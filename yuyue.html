@@ -116,7 +116,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Segoe UI',sans-
 // ==================== Supabase 初始化 ====================
 var SUPABASE_URL = "https://xnayjzwkailupwjsjpvr.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhuYXlqendrYWlsdXB3anNqcHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MzA0NTMsImV4cCI6MjA5NjIwNjQ1M30.V61HUqbFEQULhsrMA0Drzfuvl8QH_A6SEoC8Qy8HhUA";
-var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+var sb;try{sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}catch(e){document.getElementById('loader').classList.add('hide');document.getElementById('app').innerHTML='<div style="padding:60px 20px;text-align:center"><h3>SDK加载失败</h3><p style="color:var(--t2)">请刷新页面重试</p></div>';throw e}
 
 // ==================== 北京时间工具 ====================
 // 直接用浏览器本地时间（中国用户本地时区=UTC+8=北京时间）
@@ -276,8 +276,10 @@ function edInst(orig){
 // ==================== 启动 ====================
 async function init(){
   ld('连接数据库…');
-  try{await loadInsts();await loadResvs();cache.myResvs=await loadMyResvs()}catch(e){unld();toast('数据库连接失败: '+e.message,'err');return}
-  // 15天清理：删除非活跃的旧记录
+  var ok=false;
+  var tmr=setTimeout(function(){if(!ok){unld();document.getElementById('app').innerHTML='<div style="padding:60px 20px;text-align:center"><div style="font-size:50px;margin-bottom:16px">⏳</div><h3>连接超时</h3><p style="color:var(--t2);margin:8px 0">数据库响应过慢，请检查网络后刷新</p><button onclick="location.reload()" style="margin-top:16px;padding:12px 32px;border-radius:24px;background:var(--c1);color:#fff;border:none;font-size:15px;cursor:pointer">重新加载</button></div>'}},10000);
+  try{await loadInsts();await loadResvs();cache.myResvs=await loadMyResvs()}catch(e){clearTimeout(tmr);unld();toast('数据库连接失败: '+e.message,'err');return}
+  clearTimeout(tmr);ok=true;
   try{var d15=new Date(Date.now()-15*86400000).toISOString();await sb.from('reservations').delete().lt('booked_at',d15).neq('status','active')}catch(e){}
   S.today=tdy();S.selDate=S.today;if(cache.insts.length>0)S.selInst=cache.insts[0].id;cSlots();unld();render()
 }
