@@ -197,15 +197,46 @@ async function bkSlots(slots,name,notes){
 }
 
 // ── 我的预约 ──
+var selBks={};
 function rMy(){
+  selBks={};
   var w=h('div',{className:'page active'}),all=cache.myResvs||[],al=all.filter(function(r){return r.status==='active'&&!iExp(r.date,r.start_time)}),hl=all.filter(function(r){return r.status!=='active'||iExp(r.date,r.start_time)});
   hl.sort(function(a,b){return(b.date||'').localeCompare(a.date||'')||(b.start_time||'').localeCompare(a.start_time||'')});
   var tr=h('div',{className:'booking-tabs'});tr.appendChild(h('div',{className:'btab'+(S.btab==='active'?' on':''),onclick:function(){S.btab='active';render()}},['进行中',al.length>0?h('span',{className:'bnum',text:String(al.length)}):null]));tr.appendChild(h('div',{className:'btab'+(S.btab==='history'?' on':''),onclick:function(){S.btab='history';render()}},'历史记录'));w.appendChild(tr);
-  if(S.btab==='active'){if(al.length===0)w.appendChild(h('div',{className:'empty-box'},[h('div',{className:'eico',text:'📋'}),'暂无进行中的预约',h('div',{style:'font-size:12px;margin-top:4px',text:'去首页预约仪器吧'})]));else al.forEach(function(r){w.appendChild(rCard(r,true))})}
-  else{if(hl.length===0)w.appendChild(h('div',{className:'empty-box'},[h('div',{className:'eico',text:'📭'}),'暂无历史记录']));else hl.forEach(function(r){w.appendChild(rCard(r,false))})}
+  if(S.btab==='active'){
+    if(al.length===0)w.appendChild(h('div',{className:'empty-box'},[h('div',{className:'eico',text:'📋'}),'暂无进行中的预约',h('div',{style:'font-size:12px;margin-top:4px',text:'去首页预约仪器吧'})]));
+    else{
+      var selCount=0;
+      var batchBar=h('div',{style:'display:flex;align-items:center;justify-content:space-between;padding:8px 16px;background:#FFF8E1;margin:8px 16px;border-radius:12px;font-size:13px;display:none'});
+      var batchInfo=h('span',{style:'color:#E65100'});
+      var batchBtn=h('button',{style:'padding:6px 16px;border-radius:14px;background:var(--r);color:#fff;border:none;font-size:12px;cursor:pointer;font-weight:600',text:'批量取消'});
+      batchBtn.addEventListener('click',function(){
+        var ids=Object.keys(selBks).filter(function(k){return selBks[k]});
+        if(ids.length===0)return;
+        showModal({title:'批量取消',body:'<p style=\"line-height:1.8\">确定要取消选中的 <strong>'+ids.length+'</strong> 条预约吗？<br>取消后对应时段将释放。</p>',footer:'<button class=\"btn btn-cancel\" id=\"bcb1\">我再想想</button><button class=\"btn btn-confirm danger\" id=\"bcb2\">确定取消</button>',onShow:function(){
+          document.getElementById('bcb1').addEventListener('click',closeModal);
+          document.getElementById('bcb2').addEventListener('click',async function(){closeModal();
+            for(var i=0;i<ids.length;i++){try{await api('PATCH','/reservations?id=eq.'+encodeURIComponent(ids[i]),{status:'cancelled',cancelled_at:new Date().toISOString()})}catch(e){}}
+            await ldResvs();cache.myResvs=await ldMy();selBks={};toast('已取消 '+ids.length+' 条','ok');render()})}})});
+      batchBar.appendChild(batchInfo);
+      batchBar.appendChild(batchBtn);
+      w.appendChild(batchBar);
+      al.forEach(function(r){
+        var card=rCard(r,true);
+        var chk=h('input',{type:'checkbox',style:'width:18px;height:18px;cursor:pointer;accent-color:var(--r)'});
+        chk.addEventListener('change',function(){
+          selBks[r.id]=chk.checked;
+          var cnt=Object.values(selBks).filter(function(v){return v}).length;
+          if(cnt>0){batchBar.style.display='flex';batchInfo.textContent='已选 '+cnt+' 条'}else{batchBar.style.display='none'}
+        });
+        card.querySelector('.bcard-hd').insertBefore(chk,card.querySelector('.bcard-hd').firstChild);
+        w.appendChild(card);
+      });
+    }
+  }else{if(hl.length===0)w.appendChild(h('div',{className:'empty-box'},[h('div',{className:'eico',text:'📭'}),'暂无历史记录']));else hl.forEach(function(r){w.appendChild(rCard(r,false))})}
   return w
 }
-function rCard(r,act){var ex=iExp(r.date,r.start_time),can=act&&!ex&&r.status==='active',st=r.status==='cancelled'?'已取消':(ex?'已过期':'进行中'),sc=r.status==='cancelled'?'can':((ex||r.status==='expired')?'exp':'act');var c=h('div',{className:'bcard'+(act?'':' hist')});c.appendChild(h('div',{className:'bcard-hd'},[h('div',{className:'bcard-name'},[h('span',{text:'🧬'}),r.instrument_name]),h('span',{className:'bcard-st '+sc,text:st})]));c.appendChild(h('div',{className:'bcard-bd'},[rL('预约日期',r.date+' '+wkZh(r.date)),rL('预约时段',r.start_time+' - '+r.end_time),rL('预约人',r.name||''),r.notes?rL('备注',r.notes):null,rL('提交时间',r.booked_at?fmD(new Date(r.booked_at),'YYYY-MM-DD HH:mm'):'')]));if(act)c.appendChild(h('div',{className:'bcard-ft'},[can?h('button',{className:'btn-sm danger',text:'取消预约',onclick:function(){cancelBk(r.id)}}):h('button',{className:'btn-sm ghost',text:ex?'已过期':'不可取消'})]));return c}
+function rCard(r,act){var ex=iExp(r.date,r.start_time),can=act&&!ex&&r.status==='active',st=r.status==='cancelled'?'已取消':(ex?'已过期':'进行中'),sc=r.status==='cancelled'?'can':((ex||r.status==='expired')?'exp':'act');var c=h('div',{className:'bcard'+(act?'':' hist')});var hd=h('div',{className:'bcard-hd'});hd.appendChild(h('div',{className:'bcard-name'},[h('span',{text:'🧬'}),r.instrument_name]));hd.appendChild(h('span',{className:'bcard-st '+sc,text:st}));c.appendChild(hd);c.appendChild(h('div',{className:'bcard-bd'},[rL('预约日期',r.date+' '+wkZh(r.date)),rL('预约时段',r.start_time+' - '+r.end_time),rL('预约人',r.name||''),r.notes?rL('备注',r.notes):null,rL('提交时间',r.booked_at?fmD(new Date(r.booked_at),'YYYY-MM-DD HH:mm'):'')]));if(act)c.appendChild(h('div',{className:'bcard-ft'},[can?h('button',{className:'btn-sm danger',text:'取消预约',onclick:function(){cancelBk(r.id)}}):h('button',{className:'btn-sm ghost',text:ex?'已过期':'不可取消'})]));return c}
 function rL(l,v){return h('div',{className:'bcard-row'},[h('span',{className:'lbl',text:l}),h('span',{className:'val',text:v})])}
 async function cancelBk(bid,isAdmin){if(!isAdmin){var r=cache.resvs.find(function(x){return x.id===bid});if(!r||r.user_id!==UID){toast('无权操作','err');return}}showModal({title:'确认取消',body:'<p style=\"line-height:1.8\">确定要取消该预约吗？<br>取消后该时段将释放。</p>',footer:'<button class=\"btn btn-cancel\" id=\"bcn2\">我再想想</button><button class=\"btn btn-confirm danger\" id=\"bcy2\">确定取消</button>',onShow:function(){document.getElementById('bcn2').addEventListener('click',closeModal);document.getElementById('bcy2').addEventListener('click',async function(){closeModal();try{await api('PATCH','/reservations?id=eq.'+encodeURIComponent(bid),{status:'cancelled',cancelled_at:new Date().toISOString()});await ldResvs();if(!isAdmin)cache.myResvs=await ldMy();toast('已取消','ok');render()}catch(e){toast('取消失败: '+e.message)}})}})}
 
