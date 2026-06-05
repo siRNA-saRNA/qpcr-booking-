@@ -133,7 +133,7 @@ function iExp(ds,ts){return Date.now()>sUTC(ds,ts)}
 function toast(m,t){t=t||'info';var c=document.getElementById('toast-container'),e=document.createElement('div');e.className='toast '+t;e.textContent=m;c.appendChild(e);setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},2500)}
 function ld(s){var l=document.getElementById('loader');l.classList.remove('hide');l.lastChild.textContent=s||'加载中…'}
 function unld(){document.getElementById('loader').classList.add('hide')}
-function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/\\/g,'&#92;')}
 function showModal(o){var c=document.getElementById('modal-container');c.innerHTML='<div class="modal-overlay" id="mo"><div class="modal-sheet"><div class="modal-hd"><span class="modal-title">'+esc(o.title||'')+'</span><span class="modal-close" id="mc">✕</span></div><div class="modal-bd">'+(o.body||'')+'</div>'+(o.footer!==false?'<div class="modal-ft">'+(o.footer||'')+'</div>':'')+'</div></div>';document.getElementById('mo').addEventListener('click',function(e){if(e.target===this)closeModal()});document.getElementById('mc').addEventListener('click',closeModal);if(o.onShow)o.onShow()}
 function closeModal(){document.getElementById('modal-container').innerHTML=''}
 
