@@ -129,9 +129,29 @@ function rBook(){
   for(var i=0;i<7;i++){var d=new Date(sd.getTime()+i*86400000),ds=fmD(d,'YYYY-MM-DD'),p=ds.split('-');dl.push({ds:ds,day:parseInt(p[1])+'/'+parseInt(p[2]),wk:wkZh(ds)})}
   var w=h('div',{className:'page active'});
   w.appendChild(h('div',{className:'cal-wrap'},h('div',{className:'cal-row'},dl.map(function(dd){var cl='day-chip';if(dd.ds===S.today)cl+=' today';if(dd.ds===S.selDate)cl+=' on';return h('div',{className:cl,onclick:function(){S.selDate=dd.ds;S.checked=[];cSlots();render()}},[h('span',{className:'dw',text:dd.wk}),h('span',{className:'dn',text:dd.day})])}))));
-  w.appendChild(h('div',{className:'inst-wrap'},[h('div',{className:'sec-label'},[h('span',{className:'ico',text:'🧬'}),'选择仪器',h('span',{className:'sec-hint',text:'（同一时间只能预约一台）'})]),h('div',{className:'inst-grid'},insts.map(function(x){var cl='inst-chip';if(x.id===S.selInst)cl+=' on';return h('div',{className:cl,onclick:function(){S.selInst=x.id;S.checked=[];cSlots();render()}},[h('div',{className:'inst-dot '+(x.status==='active'?'green':'gray')}),h('div',{className:'inst-info'},[h('span',{className:'inst-name',text:x.name}),h('span',{className:'inst-loc',text:x.location||'')]}),x.status==='maintenance'?h('span',{className:'inst-tag mt',text:'维修中'}):null,x.status==='broken'?h('span',{className:'inst-tag br',text:'故障'}):null])}))]));
+  var instWrap=h('div',{className:'inst-wrap'});
+  var lblRow=h('div',{className:'sec-label'});
+  lblRow.appendChild(h('span',{className:'ico',text:'🧬'}));
+  lblRow.appendChild(document.createTextNode('选择仪器'));
+  lblRow.appendChild(h('span',{className:'sec-hint',text:'（同一时间只能预约一台）'}));
+  instWrap.appendChild(lblRow);
+  var grid=h('div',{className:'inst-grid'});
+  insts.forEach(function(x){
+    var cl='inst-chip';if(x.id===S.selInst)cl+=' on';
+    var chip=h('div',{className:cl,onclick:function(){S.selInst=x.id;S.checked=[];cSlots();render()}});
+    chip.appendChild(h('div',{className:'inst-dot '+(x.status==='active'?'green':'gray')}));
+    var info=h('div',{className:'inst-info'});
+    info.appendChild(h('span',{className:'inst-name',text:x.name}));
+    info.appendChild(h('span',{className:'inst-loc',text:x.location||''}));
+    chip.appendChild(info);
+    if(x.status==='maintenance')chip.appendChild(h('span',{className:'inst-tag mt',text:'维修中'}));
+    else if(x.status==='broken')chip.appendChild(h('span',{className:'inst-tag br',text:'故障'}));
+    grid.appendChild(chip);
+  });
+  instWrap.appendChild(grid);
+  w.appendChild(instWrap);
   // 当日总览
-  (function(){var free=0,busy=[],allI=insts.filter(function(i){return i.status==='active'});allI.forEach(function(ii){var has=cache.resvs.some(function(r){return r.status==='active'&&r.instrument_id===ii.id&&r.date===S.selDate});if(has){var bkr=cache.resvs.find(function(r){return r.status==='active'&&r.instrument_id===ii.id&&r.date===S.selDate});busy.push((bkr?bkr.name:'?')+'-'+ii.name)}else free++});if(allI.length>0){w.appendChild(h('div',{className:'day-summary',text:'📊 当日：🟢'+free+'台空闲'+(busy.length>0?' | 📌'+busy.length+'台（'+busy.join(', ')+')':(' | 全部空闲'))}))}})();
+  try{var free=0,busy=[];var allI=insts.filter(function(i){return i.status==='active'});for(var a=0;a<allI.length;a++){var ii=allI[a];var has=false;var bkr=null;for(var b=0;b<cache.resvs.length;b++){var rr=cache.resvs[b];if(rr.status==='active'&&rr.instrument_id===ii.id&&rr.date===S.selDate){has=true;bkr=rr;break}}if(has){busy.push((bkr?bkr.name:'?')+'-'+ii.name)}else{free++}}var msg='📊 当日：🟢'+free+'台空闲';if(busy.length>0){msg=msg+' | 📌'+busy.length+'台（'+busy.join(', ')+'）'}else{msg=msg+' | 全部空闲'}w.appendChild(h('div',{className:'day-summary',text:msg}))}catch(e){}
   if(S.s530)w.appendChild(h('div',{className:'alert alert-warn',text:'⏰ 未来日期预约将于每日 17:30 开放'}));
   if(S.dr)w.appendChild(h('div',{className:'alert alert-err',text:'⚠️ '+S.dr}));
   var ss=h('div',{className:'slot-wrap'});ss.appendChild(h('div',{className:'sec-label'},[h('span',{className:'ico',text:'🕐'}),S.selDate+' 可约时段',h('span',{className:'sec-badge',text:S.slots.length+'个'})]));
