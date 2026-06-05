@@ -2,397 +2,244 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta property="og:title" content="qPCR仪器预约">
 <meta property="og:description" content="实验室qPCR仪器预约系统 · 快速预约">
 <meta property="og:image" content="https://picsum.photos/300/200">
 <meta property="og:type" content="website">
 <title>qPCR仪器预约</title>
 <style>
-:root{--c1:#2B7C85;--c2:#1A5C63;--green:#27AE60;--red:#E74C3C;--orange:#F39C12;--blue:#3498DB;--bg:#F0F4F5;--card:#FFFFFF;--text:#1E2D2F;--text2:#7B8D8F;--shadow:0 2px 12px rgba(0,0,0,0.06)}
+:root{--c1:#2B7C85;--c2:#1A5C63;--g:#27AE60;--r:#E74C3C;--o:#F39C12;--b:#3498DB;--bg:#F0F4F5;--card:#fff;--t:#1E2D2F;--t2:#7B8D8F;--s:0 2px 12px rgba(0,0,0,.06)}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:15px;min-height:100vh}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Segoe UI',sans-serif;background:var(--bg);color:var(--t);font-size:15px;min-height:100vh}
 #app{max-width:520px;margin:0 auto;min-height:100vh;position:relative}
-
 .nav-bar{display:flex;background:linear-gradient(135deg,#2B7C85 0%,#1A5C63 40%,#0F3F45 100%);padding:12px 0 0}
-.nav-item{flex:1;text-align:center;padding:14px 4px 12px;color:rgba(255,255,255,0.6);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;border-bottom:3px solid transparent}
+.nav-item{flex:1;text-align:center;padding:14px 4px 12px;color:rgba(255,255,255,.6);font-size:14px;font-weight:500;cursor:pointer;transition:.2s;border-bottom:3px solid transparent}
 .nav-item.on{color:#fff;border-bottom-color:#fff;font-weight:700}
 .nav-badge{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#fff;color:var(--c1);font-size:11px;font-weight:700;padding:0 5px;margin-left:4px;vertical-align:top}
-
-.page{display:none;padding-bottom:100px}
-.page.active{display:block}
-
-.cal-wrap{padding:4px 12px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.cal-wrap::-webkit-scrollbar{display:none}
+.page{display:none;padding-bottom:100px}.page.active{display:block}
+.cal-wrap{padding:4px 12px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch}.cal-wrap::-webkit-scrollbar{display:none}
 .cal-row{display:flex;gap:10px;white-space:nowrap;padding:2px 4px}
-.day-chip{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:70px;height:80px;border-radius:18px;background:var(--card);box-shadow:var(--shadow);cursor:pointer;transition:all .2s;flex-shrink:0;padding:4px 10px;user-select:none}
-.day-chip.today{border:2px solid var(--c1)}
-.day-chip.on{background:linear-gradient(135deg,#2B7C85,#1A5C63);border:none;transform:scale(1.05)}
-.day-chip.on .dw,.day-chip.on .dn{color:#fff!important}
-.dw{font-size:11px;color:var(--text2)}
-.dn{font-size:22px;font-weight:800;color:var(--text);margin-top:2px}
-
-.inst-wrap{padding:4px 12px}
-.inst-grid{display:flex;flex-wrap:wrap;gap:10px}
-.inst-chip{display:flex;align-items:center;gap:10px;width:calc((100% - 10px)/2);padding:14px 12px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);border:2px solid transparent;cursor:pointer;transition:all .18s}
-.inst-chip.on{border-color:var(--c1);background:#E8F4F5}
-.inst-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
-.inst-dot.green{background:var(--green);box-shadow:0 0 8px rgba(39,174,96,0.4)}
-.inst-dot.gray{background:#BDC3C7}
-.inst-info{flex:1;min-width:0}
-.inst-name{font-size:14px;font-weight:700;display:block}
-.inst-loc{font-size:11px;color:var(--text2)}
-.inst-status-tag{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600;flex-shrink:0}
-.inst-status-tag.mt{background:#FFF3E0;color:#E65100}
-.inst-status-tag.br{background:#FFEBEE;color:#C62828}
-
-.sec-label{display:flex;align-items:center;gap:6px;padding:8px 16px 12px;font-size:14px;font-weight:700;color:var(--text)}
-.sec-label .ico{font-size:16px}
-.sec-hint{font-size:12px;color:var(--text2);font-weight:400;margin-left:auto}
+.day-chip{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:70px;height:80px;border-radius:18px;background:var(--card);box-shadow:var(--s);cursor:pointer;transition:.2s;flex-shrink:0;padding:4px 10px;user-select:none}
+.day-chip.today{border:2px solid var(--c1)}.day-chip.on{background:linear-gradient(135deg,#2B7C85,#1A5C63);border:none;transform:scale(1.05)}
+.day-chip.on .dw,.day-chip.on .dn{color:#fff!important}.dw{font-size:11px;color:var(--t2)}.dn{font-size:22px;font-weight:800;color:var(--t);margin-top:2px}
+.inst-wrap{padding:4px 12px}.inst-grid{display:flex;flex-wrap:wrap;gap:10px}
+.inst-chip{display:flex;align-items:center;gap:10px;width:calc((100% - 10px)/2);padding:14px 12px;border-radius:14px;background:var(--card);box-shadow:var(--s);border:2px solid transparent;cursor:pointer;transition:.18s}
+.inst-chip.on{border-color:var(--c1);background:#E8F4F5}.inst-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.inst-dot.green{background:var(--g);box-shadow:0 0 8px rgba(39,174,96,.4)}.inst-dot.gray{background:#BDC3C7}
+.inst-info{flex:1;min-width:0}.inst-name{font-size:14px;font-weight:700;display:block}.inst-loc{font-size:11px;color:var(--t2)}
+.inst-tag{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600;flex-shrink:0}.inst-tag.mt{background:#FFF3E0;color:#E65100}.inst-tag.br{background:#FFEBEE;color:#C62828}
+.sec-label{display:flex;align-items:center;gap:6px;padding:8px 16px 12px;font-size:14px;font-weight:700;color:var(--t)}
+.sec-label .ico{font-size:16px}.sec-hint{font-size:12px;color:var(--t2);font-weight:400;margin-left:auto}
 .sec-badge{margin-left:auto;font-size:11px;background:#E8F5E9;color:#2E7D32;padding:2px 10px;border-radius:10px;font-weight:600}
-
 .alert{margin:6px 16px;padding:12px 16px;border-radius:12px;font-size:13px;display:flex;align-items:center;gap:6px}
-.alert-warn{background:#FFF8E1;color:#E65100}
-.alert-err{background:#FFEBEE;color:#C62828}
-
-.slot-wrap{padding:4px 16px}
-.slot-grid{display:flex;flex-wrap:wrap;gap:10px}
-.slot-card{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;width:calc((100% - 20px)/3);padding:14px 6px;border-radius:14px;background:var(--card);border:2px solid #E0E6E7;cursor:pointer;transition:all .15s;user-select:none;text-align:center}
-.slot-card:active{transform:scale(0.95)}
-.slot-time{font-size:14px;font-weight:700}
-.slot-dash{font-size:11px;color:#BDC3C7;margin:0 2px}
+.alert-warn{background:#FFF8E1;color:#E65100}.alert-err{background:#FFEBEE;color:#C62828}
+.slot-wrap{padding:4px 16px}.slot-grid{display:flex;flex-wrap:wrap;gap:10px}
+.slot-card{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;width:calc((100% - 20px)/3);padding:14px 6px;border-radius:14px;background:var(--card);border:2px solid #E0E6E7;cursor:pointer;transition:.15s;user-select:none;text-align:center}
+.slot-card:active{transform:scale(.95)}.slot-time{font-size:14px;font-weight:700}.slot-dash{font-size:11px;color:#BDC3C7;margin:0 2px}
 .slot-tag{width:100%;margin-top:4px;font-size:11px;text-align:center}
-.slot-free .slot-tag{color:#2E7D32}
-.slot-free{border-color:#A5D6A7;background:#F1F8F2}
-.slot-mine .slot-tag{color:#F57F17}
-.slot-mine{border-color:#FFF176;background:#FFFDE7}
-.slot-booked .slot-tag{color:#BDBDBD}
-.slot-booked{border-color:#E0E0E0;background:#FAFAFA}
-.slot-locked .slot-tag{color:#BDBDBD}
-.slot-locked{border-color:#E0E0E0;background:#F5F5F5}
-.slot-disabled .slot-tag{color:#BDBDBD}
-.slot-disabled{border-color:#EEE;background:#F5F5F5;border-style:dashed}
-.slot-picked{border-color:var(--blue);background:#E3F2FD}
-.slot-picked .slot-tag{color:#1565C0;font-weight:600}
-
-.empty-box{display:flex;flex-direction:column;align-items:center;padding:60px 0;color:var(--text2);font-size:14px}
-.empty-box .eico{font-size:50px;margin-bottom:10px}
-.loading-box{display:flex;align-items:center;justify-content:center;padding:60px 0;color:var(--text2);font-size:14px}
-
-.submit-bar{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;padding-bottom:calc(14px + env(safe-area-inset-bottom,8px));background:var(--card);box-shadow:0 -4px 20px rgba(0,0,0,0.08);z-index:50}
-.submit-bar.has{background:#E8F4F5}
-.submit-hint{font-size:14px;color:var(--text2)}
-.submit-count{font-size:14px;color:var(--text)}
-.submit-count b{font-size:24px;font-weight:800;color:var(--c1)}
-.submit-btn{padding:12px 36px;border-radius:28px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;border:none;color:#BDC3C7;background:#ECF0F1}
-.submit-btn.go{background:linear-gradient(135deg,#2B7C85,#1A5C63);color:#fff;box-shadow:0 4px 14px rgba(43,124,133,0.35)}
-.submit-btn.go:active{transform:scale(0.96)}
-
+.slot-free .slot-tag{color:#2E7D32}.slot-free{border-color:#A5D6A7;background:#F1F8F2}
+.slot-mine .slot-tag{color:#F57F17}.slot-mine{border-color:#FFF176;background:#FFFDE7}
+.slot-booked .slot-tag{color:#BDBDBD}.slot-booked{border-color:#E0E0E0;background:#FAFAFA}
+.slot-locked .slot-tag{color:#BDBDBD}.slot-locked{border-color:#E0E0E0;background:#F5F5F5}
+.slot-disabled .slot-tag{color:#BDBDBD}.slot-disabled{border-color:#EEE;background:#F5F5F5;border-style:dashed}
+.slot-picked{border-color:var(--b);background:#E3F2FD}.slot-picked .slot-tag{color:#1565C0;font-weight:600}
+.empty-box{display:flex;flex-direction:column;align-items:center;padding:60px 0;color:var(--t2);font-size:14px}.empty-box .eico{font-size:50px;margin-bottom:10px}
+.submit-bar{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;padding-bottom:calc(14px + env(safe-area-inset-bottom,8px));background:var(--card);box-shadow:0 -4px 20px rgba(0,0,0,.08);z-index:50}
+.submit-bar.has{background:#E8F4F5}.submit-hint{font-size:14px;color:var(--t2)}.submit-count{font-size:14px;color:var(--t)}
+.submit-count b{font-size:24px;font-weight:800;color:var(--c1)}.submit-btn{padding:12px 36px;border-radius:28px;font-size:15px;font-weight:600;cursor:pointer;transition:.2s;border:none;color:#BDC3C7;background:#ECF0F1}
+.submit-btn.go{background:linear-gradient(135deg,#2B7C85,#1A5C63);color:#fff;box-shadow:0 4px 14px rgba(43,124,133,.35)}.submit-btn.go:active{transform:scale(.96)}
+.btn-load{opacity:.6;pointer-events:none}
 .booking-tabs{display:flex;gap:12px;padding:14px 16px;background:#fff;border-bottom:1px solid #ECF0F1}
-.btab{padding:10px 22px;border-radius:24px;font-size:14px;cursor:pointer;background:#ECF0F1;color:var(--text2);transition:all .2s;font-weight:500}
-.btab.on{background:var(--c1);color:#fff;font-weight:700}
-.btab .bnum{display:inline-block;min-width:20px;height:20px;line-height:20px;border-radius:10px;background:#fff;color:var(--c1);font-size:11px;font-weight:700;padding:0 6px;margin-left:4px;text-align:center}
-.bcard{background:#fff;margin:14px 16px;border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
-.bcard.hist{opacity:0.8}
+.btab{padding:10px 22px;border-radius:24px;font-size:14px;cursor:pointer;background:#ECF0F1;color:var(--t2);transition:.2s;font-weight:500}
+.btab.on{background:var(--c1);color:#fff;font-weight:700}.btab .bnum{display:inline-block;min-width:20px;height:20px;line-height:20px;border-radius:10px;background:#fff;color:var(--c1);font-size:11px;font-weight:700;padding:0 6px;margin-left:4px;text-align:center}
+.bcard{background:#fff;margin:14px 16px;border-radius:16px;box-shadow:var(--s);overflow:hidden}.bcard.hist{opacity:.8}
 .bcard-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #ECF0F1}
-.bcard-name{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700}
-.bcard-name .mi{font-size:22px}
+.bcard-name{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700}.bcard-name .mi{font-size:22px}
 .bcard-st{font-size:12px;padding:4px 12px;border-radius:12px;font-weight:600}
-.bcard-st.act{background:#E8F5E9;color:var(--green)}
-.bcard-st.can{background:#FFF3E0;color:var(--orange)}
-.bcard-st.exp{background:#ECF0F1;color:var(--text2)}
-.bcard-bd{padding:14px 20px}
-.bcard-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}
-.bcard-row .lbl{color:var(--text2)}
-.bcard-row .val{font-weight:500}
+.bcard-st.act{background:#E8F5E9;color:var(--g)}.bcard-st.can{background:#FFF3E0;color:var(--o)}.bcard-st.exp{background:#ECF0F1;color:var(--t2)}
+.bcard-bd{padding:14px 20px}.bcard-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px}
+.bcard-row .lbl{color:var(--t2)}.bcard-row .val{font-weight:500}
 .bcard-ft{padding:12px 20px;border-top:1px solid #ECF0F1;display:flex;justify-content:flex-end;gap:10px}
 .btn-sm{padding:8px 20px;border-radius:20px;font-size:13px;cursor:pointer;border:none;font-weight:500}
-.btn-sm.danger{background:var(--red);color:#fff}
-.btn-sm.ghost{background:#ECF0F1;color:var(--text2)}
-
-.adm-card{display:flex;align-items:center;justify-content:space-between;background:#fff;margin:12px 16px;padding:18px 20px;border-radius:16px;box-shadow:var(--shadow)}
-.adm-left{flex:1}
-.adm-name{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600}
-.adm-loc{font-size:12px;color:var(--text2);margin-top:4px}
-.adm-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.btn-sm.danger{background:var(--r);color:#fff}.btn-sm.ghost{background:#ECF0F1;color:var(--t2)}
+.adm-card{display:flex;align-items:center;justify-content:space-between;background:#fff;margin:12px 16px;padding:18px 20px;border-radius:16px;box-shadow:var(--s)}
+.adm-l{flex:1}.adm-name{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600}.adm-loc{font-size:12px;color:var(--t2);margin-top:4px}
+.adm-r{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .adm-st{font-size:11px;padding:4px 12px;border-radius:12px;font-weight:600}
-.adm-st.act{background:#E8F5E9;color:#27AE60}
-.adm-st.mt{background:#FFF3E0;color:#F39C12}
-.adm-st.br{background:#FFEBEE;color:#E74C3C}
+.adm-st.act{background:#E8F5E9;color:#27AE60}.adm-st.mt{background:#FFF3E0;color:#F39C12}.adm-st.br{background:#FFEBEE;color:#E74C3C}
 .adm-edit{font-size:12px;color:var(--c1);background:#E8F4F5;padding:4px 12px;border-radius:10px;cursor:pointer}
-
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.modal-sheet{width:100%;max-width:520px;max-height:85vh;background:#fff;border-radius:24px 24px 0 0;padding-bottom:env(safe-area-inset-bottom,12px);animation:slideUp .25s;overflow-y:auto}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;animation:fi .2s}
+@keyframes fi{from{opacity:0}to{opacity:1}}
+.modal-sheet{width:100%;max-width:520px;max-height:85vh;background:#fff;border-radius:24px 24px 0 0;padding-bottom:env(safe-area-inset-bottom,12px);animation:su .25s;overflow-y:auto}
+@keyframes su{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-hd{display:flex;align-items:center;justify-content:space-between;padding:20px;border-bottom:1px solid #ECF0F1}
-.modal-title{font-size:18px;font-weight:700}
-.modal-close{font-size:24px;color:var(--text2);cursor:pointer;padding:4px 8px}
-.modal-bd{padding:20px}
-.modal-ft{display:flex;gap:12px;padding:14px 20px;border-top:1px solid #ECF0F1}
+.modal-title{font-size:18px;font-weight:700}.modal-close{font-size:24px;color:var(--t2);cursor:pointer;padding:4px 8px}
+.modal-bd{padding:20px}.modal-ft{display:flex;gap:12px;padding:14px 20px;border-top:1px solid #ECF0F1}
 .modal-ft .btn{flex:1;padding:14px;border-radius:24px;font-size:15px;text-align:center;cursor:pointer;border:none;font-weight:600}
-.btn-cancel{background:#ECF0F1;color:var(--text2)}
-.btn-confirm{background:var(--c1);color:#fff}
-.btn-confirm.danger{background:var(--red)}
-
-.fg{margin-bottom:18px}
-.fg-label{display:block;font-size:14px;font-weight:600;margin-bottom:8px}
+.btn-cancel{background:#ECF0F1;color:var(--t2)}.btn-confirm{background:var(--c1);color:#fff}.btn-confirm.danger{background:var(--r)}
+.fg{margin-bottom:18px}.fg-label{display:block;font-size:14px;font-weight:600;margin-bottom:8px}
 .fg-input{width:100%;height:44px;padding:0 14px;border:2px solid #ECF0F1;border-radius:12px;font-size:15px;background:#FAFAFA;outline:none;transition:border .15s}
-.fg-input:focus{border-color:var(--c1);background:#fff}
-.fg-input.err{border-color:var(--red);background:#FFF5F5}
-.fg-err{font-size:12px;color:var(--red);margin-top:4px;display:none}
-
+.fg-input:focus{border-color:var(--c1);background:#fff}.fg-input.err{border-color:var(--r);background:#FFF5F5}
+.fg-err{font-size:12px;color:var(--r);margin-top:4px;display:none}
 .st-options{display:flex;flex-direction:column;gap:10px}
 .st-opt{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;background:#FAFAFA;border:2px solid transparent;cursor:pointer;font-size:14px;transition:.15s}
-.st-opt.sel{border-color:var(--c1);background:#E8F4F5}
-.st-dot{width:20px;height:20px;border-radius:50%;border:2px solid #BDC3C7;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.st-dot.chk{border-color:var(--c1)}
-.st-dot.chk::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--c1)}
-
+.st-opt.sel{border-color:var(--c1);background:#E8F4F5}.st-dot{width:20px;height:20px;border-radius:50%;border:2px solid #BDC3C7;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.st-dot.chk{border-color:var(--c1)}.st-dot.chk::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--c1)}
 .warn-box{display:flex;gap:12px;padding:16px;background:#FFF8E1;border-radius:12px;border-left:4px solid #F39C12;margin-top:8px;font-size:13px}
-.warn-ico{font-size:28px;flex-shrink:0}
-.warn-ttl{font-weight:700;color:#E67E22;display:block;margin-bottom:4px}
-.warn-list{margin-top:8px}
-.warn-list li{color:#795548;font-size:12px;padding:2px 0}
-
+.warn-ico{font-size:28px;flex-shrink:0}.warn-ttl{font-weight:700;color:#E67E22;display:block;margin-bottom:4px}
+.warn-list{margin-top:8px}.warn-list li{color:#795548;font-size:12px;padding:2px 0}
 #toast-container{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none}
-.toast{padding:12px 24px;border-radius:24px;font-size:14px;font-weight:500;color:#fff;pointer-events:auto;animation:toastIn .3s,toastOut .3s 2s forwards;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.2)}
-.toast.info{background:#333}
-.toast.ok{background:var(--green)}
-.toast.err{background:var(--red)}
-@keyframes toastIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(-10px)}}
-
+.toast{padding:12px 24px;border-radius:24px;font-size:14px;font-weight:500;color:#fff;pointer-events:auto;animation:ti .3s,to .3s 2s forwards;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2)}
+.toast.info{background:#333}.toast.ok{background:var(--g)}.toast.err{background:var(--r)}
+@keyframes ti{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes to{from{opacity:1}to{opacity:0;transform:translateY(-10px)}}
+#loader{position:fixed;inset:0;background:rgba(255,255,255,.8);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center}#loader.hide{display:none}
+.spin{width:36px;height:36px;border:3px solid #E0E6E7;border-top-color:var(--c1);border-radius:50%;animation:sp .8s linear infinite;margin-bottom:12px}
+@keyframes sp{to{transform:rotate(360deg)}}
 @media(min-width:520px){.slot-card{width:calc((100% - 30px)/4)}.inst-chip{width:calc((100% - 20px)/3)}}
 @media(max-width:360px){.slot-card{width:calc((100% - 10px)/2)}.inst-chip{width:100%}}
 </style>
 </head>
 <body>
+<div id="loader"><div class="spin"></div><div style="font-size:14px;color:var(--t2)">加载中…</div></div>
 <div id="app"></div>
 <div id="toast-container"></div>
 <div id="modal-container"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
+// ==================== Supabase 初始化 ====================
+var SUPABASE_URL = "https://xnayjzwkailupwjsjpvr.supabase.co";
+var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhuYXlqendrYWlsdXB3anNqcHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MzA0NTMsImV4cCI6MjA5NjIwNjQ1M30.V61HUqbFEQULhsrMA0Drzfuvl8QH_A6SEoC8Qy8HhUA";
+var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
 // ==================== 北京时间工具 ====================
-var UTC8=8*3600000;
-function bjNow(){return new Date(Date.now()+UTC8)}
-function fmtDate(d,f){var m={YYYY:d.getFullYear(),MM:String(d.getMonth()+1).padStart(2,'0'),DD:String(d.getDate()).padStart(2,'0'),HH:String(d.getHours()).padStart(2,'0'),mm:String(d.getMinutes()).padStart(2,'0')};return f.replace(/YYYY|MM|DD|HH|mm/g,function(k){return m[k]})}
-function todayStr(){return fmtDate(bjNow(),'YYYY-MM-DD')}
-function isAfter530(){var d=bjNow();return d.getHours()>5||(d.getHours()===5&&d.getMinutes()>=30)}
-function isTomorrow(s){return s===fmtDate(new Date(bjNow().getTime()+86400000),'YYYY-MM-DD')}
-function getWeekZh(s){return['周日','周一','周二','周三','周四','周五','周六'][new Date(s).getDay()]}
-function slotUTC(ds,ts){var h=ts.split(':').map(Number);return Date.UTC(+ds.slice(0,4),+ds.slice(5,7)-1,+ds.slice(8,10),h[0]-8,h[1])}
-function isExpired(ds,ts){return Date.now()>slotUTC(ds,ts)}
+var U8=8*3600000;
+function bjNow(){return new Date(Date.now()+U8)}
+function fmD(d,f){var m={YYYY:d.getFullYear(),MM:String(d.getMonth()+1).padStart(2,'0'),DD:String(d.getDate()).padStart(2,'0'),HH:String(d.getHours()).padStart(2,'0'),mm:String(d.getMinutes()).padStart(2,'0')};return f.replace(/YYYY|MM|DD|HH|mm/g,function(k){return m[k]})}
+function tdy(){return fmD(bjNow(),'YYYY-MM-DD')}
+function i530(){var d=bjNow();return d.getHours()>5||(d.getHours()===5&&d.getMinutes()>=30)}
+function iTmr(s){return s===fmD(new Date(bjNow().getTime()+86400000),'YYYY-MM-DD')}
+function wkZh(s){return['周日','周一','周二','周三','周四','周五','周六'][new Date(s).getDay()]}
+function sUTC(ds,ts){var h=ts.split(':').map(Number);return Date.UTC(+ds.slice(0,4),+ds.slice(5,7)-1,+ds.slice(8,10),h[0]-8,h[1])}
+function iExp(ds,ts){return Date.now()>sUTC(ds,ts)}
 
-// ==================== 数据层 (localStorage) ====================
-var LS={
-  get:function(k,d){try{var v=localStorage.getItem('qPCR_'+k);return v?JSON.parse(v):d}catch(e){return d}},
-  set:function(k,v){localStorage.setItem('qPCR_'+k,JSON.stringify(v))}
-};
-var SLOTS=[{st:'09:00',et:'10:00'},{st:'10:00',et:'11:00'},{st:'11:00',et:'12:00'},{st:'12:00',et:'13:00'},{st:'13:00',et:'14:00'},{st:'14:00',et:'15:00'},{st:'15:00',et:'16:00'},{st:'16:00',et:'17:00'},{st:'17:00',et:'18:00'},{st:'18:00',et:'19:00'},{st:'19:00',et:'20:00'},{st:'20:00',et:'21:00'}];
-var DEFAULT_INST=[
-  {id:'i1',name:'7500-1',location:'四楼',status:'active'},{id:'i2',name:'7500-2',location:'四楼',status:'active'},
-  {id:'i3',name:'7500-3',location:'四楼',status:'active'},{id:'i4',name:'7500-4',location:'四楼',status:'active'},
-  {id:'i5',name:'7500-5',location:'四楼',status:'active'},{id:'i6',name:'7500-6',location:'三楼',status:'active'},
-  {id:'i7',name:'7500-7',location:'三楼',status:'active'}
-];
-
-function initData(){
-  if(!LS.get('instruments'))LS.set('instruments',DEFAULT_INST);
-  if(!LS.get('reservations'))LS.set('reservations',[]);
-  if(!LS.get('userId'))LS.set('userId','u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6));
-}
-initData();
-
-function getInsts(){return LS.get('instruments',[]).sort(function(a,b){var o={active:0,maintenance:1,broken:2};return(o[a.status]||0)-(o[b.status]||0)})}
-function getResvs(){return LS.get('reservations',[])}
-function getUid(){return LS.get('userId','')}
-function saveResvs(a){LS.set('reservations',a)}
-function saveInsts(a){LS.set('instruments',a)}
-
-// ==================== Toast / Modal ====================
+// ==================== Toast / Loader / Modal ====================
 function toast(m,t){t=t||'info';var c=document.getElementById('toast-container'),e=document.createElement('div');e.className='toast '+t;e.textContent=m;c.appendChild(e);setTimeout(function(){if(e.parentNode)e.parentNode.removeChild(e)},2500)}
+function ld(s){var l=document.getElementById('loader');l.classList.remove('hide');l.lastChild.textContent=s||'加载中…'}
+function unld(){document.getElementById('loader').classList.add('hide')}
+function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function showModal(o){var c=document.getElementById('modal-container');c.innerHTML='<div class="modal-overlay" id="mo"><div class="modal-sheet"><div class="modal-hd"><span class="modal-title">'+esc(o.title||'')+'</span><span class="modal-close" id="mc">✕</span></div><div class="modal-bd">'+(o.body||'')+'</div>'+(o.footer!==false?'<div class="modal-ft">'+(o.footer||'')+'</div>':'')+'</div></div>';document.getElementById('mo').addEventListener('click',function(e){if(e.target===this)closeModal()});document.getElementById('mc').addEventListener('click',closeModal);if(o.onShow)o.onShow()}
 function closeModal(){document.getElementById('modal-container').innerHTML=''}
-function esc(s){if(!s)return'';return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+// ==================== 数据层 ====================
+var cache={insts:[],resvs:[]};
+var UID='u'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+try{var sUid=localStorage.getItem('qPCR_uid');if(sUid)UID=sUid;else localStorage.setItem('qPCR_uid',UID)}catch(e){}
+
+async function loadInsts(){var r=await sb.from('instruments').select('*').order('status',{ascending:true});if(!r.error)cache.insts=r.data;return cache.insts}
+async function loadResvs(){var r=await sb.from('reservations').select('*').eq('status','active').order('date',{ascending:true}).limit(500);if(!r.error)cache.resvs=r.data;return cache.resvs}
+async function loadMyResvs(){var r=await sb.from('reservations').select('*').eq('user_id',UID).order('date',{ascending:false}).limit(200);return r.error?[]:r.data}
 
 // ==================== 状态 ====================
-var S={page:'booking',selDate:todayStr(),today:todayStr(),selInst:'',timeSlots:[],checked:[],show530:false,instStatus:'active',disabledReason:null,btab:'active'};
+var S={page:'booking',selDate:tdy(),today:tdy(),selInst:'',slots:[],checked:[],s530:false,instSt:'active',dr:null,btab:'active'};
 
-// ==================== 渲染引擎 ====================
+// ==================== 渲染 ====================
 function h(t,a,c){var e=document.createElement(t);if(a)for(var k in a){if(k==='className')e.className=a[k];else if(k==='style')Object.assign(e.style,a[k]);else if(k.startsWith('on'))e.addEventListener(k.slice(2).toLowerCase(),a[k]);else if(k==='text')e.textContent=a[k];else if(k==='html')e.innerHTML=a[k];else e.setAttribute(k,a[k])}if(c){if(typeof c==='string'||typeof c==='number')e.textContent=c;else if(Array.isArray(c))c.forEach(function(x){if(x!=null)e.appendChild(typeof x==='string'?document.createTextNode(x):x)});else e.appendChild(c)}return e}
 
-function render(){var a=document.getElementById('app');a.innerHTML='';a.appendChild(rNav());if(S.page==='booking')a.appendChild(rBook());else if(S.page==='mybookings')a.appendChild(rMy());else if(S.page==='admin')a.appendChild(rAdmin());a.appendChild(rBar())}
+function render(){var a=document.getElementById('app');a.innerHTML='';a.appendChild(rNav());if(S.page==='booking')a.appendChild(rBook());else if(S.page==='mybookings')a.appendChild(rMy());else if(S.page==='admin')a.appendChild(rAdm());a.appendChild(rBar())}
 
-function rNav(){var n=getResvs().filter(function(r){return r.status==='active'&&r.userId===getUid()&&!isExpired(r.date,r.startTime)}).length;return h('div',{className:'nav-bar'},
-  [h('div',{className:'nav-item'+(S.page==='booking'?' on':''),onclick:function(){S.page='booking';refresh()}},'预约仪器'),
-   h('div',{className:'nav-item'+(S.page==='mybookings'?' on':''),onclick:function(){S.page='mybookings';render()}},
-     ['我的预约',n>0?h('span',{className:'nav-badge',text:String(n)}):null]),
-   h('div',{className:'nav-item'+(S.page==='admin'?' on':''),onclick:function(){S.page='admin';render()}},'仪器管理')])}
+function rNav(){var n=cache.resvs.filter(function(r){return r.user_id===UID&&r.status==='active'&&!iExp(r.date,r.start_time)}).length;return h('div',{className:'nav-bar'},[h('div',{className:'nav-item'+(S.page==='booking'?' on':''),onclick:function(){S.page='booking';cSlots();render()}},'预约仪器'),h('div',{className:'nav-item'+(S.page==='mybookings'?' on':''),onclick:async function(){S.page='mybookings';ld('加载预约…');cache.myResvs=await loadMyResvs();unld();render()}},['我的预约',n>0?h('span',{className:'nav-badge',text:String(n)}):null]),h('div',{className:'nav-item'+(S.page==='admin'?' on':''),onclick:async function(){S.page='admin';ld();await loadInsts();unld();render()}},'仪器管理')])}
 
 function rBook(){
-  var insts=getInsts();if(!S.selInst&&insts.length)S.selInst=insts[0].id;
-  compSlots();
+  var insts=cache.insts;if(!S.selInst&&insts.length)S.selInst=insts[0].id;
+  cSlots();
   var dl=[],sd=new Date(S.today);
-  for(var i=0;i<7;i++){var d=new Date(sd.getTime()+i*86400000),ds=fmtDate(d,'YYYY-MM-DD'),p=ds.split('-');dl.push({ds:ds,day:parseInt(p[1])+'/'+parseInt(p[2]),wk:getWeekZh(ds)})}
+  for(var i=0;i<7;i++){var d=new Date(sd.getTime()+i*86400000),ds=fmD(d,'YYYY-MM-DD'),p=ds.split('-');dl.push({ds:ds,day:parseInt(p[1])+'/'+parseInt(p[2]),wk:wkZh(ds)})}
   var w=h('div',{className:'page active'});
-  // 日历
-  w.appendChild(h('div',{className:'cal-wrap'},h('div',{className:'cal-row'},dl.map(function(dd){
-    var cl='day-chip';if(dd.ds===S.today)cl+=' today';if(dd.ds===S.selDate)cl+=' on';
-    return h('div',{className:cl,onclick:function(){S.selDate=dd.ds;S.checked=[];compSlots();render()}},[h('span',{className:'dw',text:dd.wk}),h('span',{className:'dn',text:dd.day})])
-  }))));
-  // 仪器
-  w.appendChild(h('div',{className:'inst-wrap'},[
-    h('div',{className:'sec-label'},[h('span',{className:'ico',text:'🧬'}),'选择仪器',h('span',{className:'sec-hint',text:'（同一时间只能预约一台）'})]),
-    h('div',{className:'inst-grid'},insts.map(function(x){
-      var cl='inst-chip';if(x.id===S.selInst)cl+=' on';
-      return h('div',{className:cl,onclick:function(){S.selInst=x.id;S.checked=[];compSlots();render()}},[
-        h('div',{className:'inst-dot '+(x.status==='active'?'green':'gray')}),
-        h('div',{className:'inst-info'},[h('span',{className:'inst-name',text:x.name}),h('span',{className:'inst-loc',text:x.location})]),
-        x.status==='maintenance'?h('span',{className:'inst-status-tag mt',text:'维修中'}):null,
-        x.status==='broken'?h('span',{className:'inst-status-tag br',text:'故障'}):null])
-    }))
-  ]));
-  if(S.show530)w.appendChild(h('div',{className:'alert alert-warn',text:'⏰ 明天仪器预约将于每日 5:30 开放'}));
-  if(S.disabledReason)w.appendChild(h('div',{className:'alert alert-err',text:'⚠️ '+S.disabledReason}));
-  // 时段
-  var ss=h('div',{className:'slot-wrap'});
-  ss.appendChild(h('div',{className:'sec-label'},[h('span',{className:'ico',text:'🕐'}),S.selDate+' 可约时段',h('span',{className:'sec-badge',text:S.timeSlots.length+'个'})]));
-  if(S.timeSlots.length===0)ss.appendChild(h('div',{className:'empty-box'},[h('div',{className:'eico',text:'📭'}),'暂无可用时段']));
-  else{var g=h('div',{className:'slot-grid'});S.timeSlots.forEach(function(s,idx){
-    var cl='slot-card slot-'+s.status;if(s.checked)cl+=' slot-picked';
-    var tag='';if(s.status==='mine')tag='🔒 我的';else if(s.status==='booked')tag='📌 已满';else if(s.status==='locked')tag='🔐 待放';else if(s.status==='disabled')tag='🚫 禁用';else if(s.checked)tag='✅ 已选';else tag='🟢 空闲';
-    g.appendChild(h('div',{className:cl,onclick:function(){togSlot(idx)}},[h('span',{className:'slot-time',text:s.startTime}),h('span',{className:'slot-dash',text:'—'}),h('span',{className:'slot-time',text:s.endTime}),h('div',{className:'slot-tag',text:tag})]))
-  });ss.appendChild(g)}
-  w.appendChild(ss);return w
-}
+  w.appendChild(h('div',{className:'cal-wrap'},h('div',{className:'cal-row'},dl.map(function(dd){var cl='day-chip';if(dd.ds===S.today)cl+=' today';if(dd.ds===S.selDate)cl+=' on';return h('div',{className:cl,onclick:function(){S.selDate=dd.ds;S.checked=[];cSlots();render()}},[h('span',{className:'dw',text:dd.wk}),h('span',{className:'dn',text:dd.day})])}))));
+  w.appendChild(h('div',{className:'inst-wrap'},[h('div',{className:'sec-label'},[h('span',{className:'ico',text:'🧬'}),'选择仪器',h('span',{className:'sec-hint',text:'（同一时间只能预约一台）'})]),h('div',{className:'inst-grid'},insts.map(function(x){var cl='inst-chip';if(x.id===S.selInst)cl+=' on';return h('div',{className:cl,onclick:function(){S.selInst=x.id;S.checked=[];cSlots();render()}},[h('div',{className:'inst-dot '+(x.status==='active'?'green':'gray')}),h('div',{className:'inst-info'},[h('span',{className:'inst-name',text:x.name}),h('span',{className:'inst-loc',text:x.location||''})]),x.status==='maintenance'?h('span',{className:'inst-tag mt',text:'维修中'}):null,x.status==='broken'?h('span',{className:'inst-tag br',text:'故障'}):null])}))]));
+  if(S.s530)w.appendChild(h('div',{className:'alert alert-warn',text:'⏰ 明天仪器预约将于每日 5:30 开放'}));
+  if(S.dr)w.appendChild(h('div',{className:'alert alert-err',text:'⚠️ '+S.dr}));
+  var ss=h('div',{className:'slot-wrap'});ss.appendChild(h('div',{className:'sec-label'},[h('span',{className:'ico',text:'🕐'}),S.selDate+' 可约时段',h('span',{className:'sec-badge',text:S.slots.length+'个'})]));
+  if(S.slots.length===0)ss.appendChild(h('div',{className:'empty-box'},[h('div',{className:'eico',text:'📭'}),'暂无可用时段']));
+  else{var g=h('div',{className:'slot-grid'});S.slots.forEach(function(s,idx){var cl='slot-card slot-'+s.status;if(s.checked)cl+=' slot-picked';var tag='';if(s.status==='mine')tag='🔒 我的';else if(s.status==='booked')tag='📌 已满';else if(s.status==='locked')tag='🔐 待放';else if(s.status==='disabled')tag='🚫 禁用';else if(s.checked)tag='✅ 已选';else tag='🟢 空闲';g.appendChild(h('div',{className:cl,onclick:function(){togS(idx)}},[h('span',{className:'slot-time',text:s.startTime}),h('span',{className:'slot-dash',text:'—'}),h('span',{className:'slot-time',text:s.endTime}),h('div',{className:'slot-tag',text:tag})]))});ss.appendChild(g)}w.appendChild(ss);return w}
 
-function compSlots(){
-  var insts=getInsts(),inst=insts.find(function(i){return i.id===S.selInst});if(!inst){S.timeSlots=[];S.show530=false;S.disabledReason=null;return}
-  var dr=null;if(inst.status==='maintenance')dr='仪器维护中，暂不可预约';else if(inst.status==='broken')dr='仪器故障，暂不可预约';S.instStatus=inst.status||'active';S.disabledReason=dr;
-  var slots=SLOTS.map(function(s){return{startTime:s.st,endTime:s.et,status:'free'}});
-  if(dr){S.timeSlots=slots.map(function(s){s.status='disabled';s.disabledReason=dr;return s});S.show530=false;return}
-  var rv=getResvs(),uid=getUid(),bs={},ms={};
-  rv.forEach(function(r){if(r.status==='active'&&r.instrumentId===S.selInst&&r.date===S.selDate){if(r.userId===uid)ms[r.startTime]=true;else bs[r.startTime]=true}});
-  var lk=(S.selDate!==S.today&&isTomorrow(S.selDate)&&!isAfter530());S.show530=lk;
+var DFT_SLOTS=[{st:'09:00',et:'10:00'},{st:'10:00',et:'11:00'},{st:'11:00',et:'12:00'},{st:'12:00',et:'13:00'},{st:'13:00',et:'14:00'},{st:'14:00',et:'15:00'},{st:'15:00',et:'16:00'},{st:'16:00',et:'17:00'},{st:'17:00',et:'18:00'},{st:'18:00',et:'19:00'},{st:'19:00',et:'20:00'},{st:'20:00',et:'21:00'}];
+
+function cSlots(){
+  var inst=cache.insts.find(function(i){return i.id===S.selInst});if(!inst){S.slots=[];S.s530=false;S.dr=null;return}
+  var dr=null;if(inst.status==='maintenance')dr='仪器维护中，暂不可预约';else if(inst.status==='broken')dr='仪器故障，暂不可预约';S.instSt=inst.status||'active';S.dr=dr;
+  var slots=DFT_SLOTS.map(function(s){return{startTime:s.st,endTime:s.et,status:'free'}});
+  if(dr){S.slots=slots.map(function(s){s.status='disabled';s.disabledReason=dr;return s});S.s530=false;return}
+  var bs={},ms={};cache.resvs.forEach(function(r){if(r.status==='active'&&r.instrument_id===S.selInst&&r.date===S.selDate){if(r.user_id===UID)ms[r.start_time]=true;else bs[r.start_time]=true}});
+  var lk=(S.selDate!==S.today&&iTmr(S.selDate)&&!i530());S.s530=lk;
   slots.forEach(function(s){if(lk)s.status='locked';else if(ms[s.startTime])s.status='mine';else if(bs[s.startTime])s.status='booked'});
   var cs={};S.checked.filter(function(x){return x.date===S.selDate}).forEach(function(x){cs[x.startTime]=true});
-  slots.forEach(function(s){s.checked=cs[s.startTime]&&s.status==='free'});S.timeSlots=slots
+  slots.forEach(function(s){s.checked=cs[s.startTime]&&s.status==='free'});S.slots=slots
 }
+function togS(idx){var s=S.slots[idx];if(['booked','mine','locked','disabled'].indexOf(s.status)>=0){if(s.status==='locked')toast('明天预约将于5:30开放','err');else if(s.status==='disabled')toast(s.disabledReason||'暂不可预约','err');else if(s.status==='mine')toast('您已预约该时段','err');return}s.checked=!s.checked;S.slots[idx]={startTime:s.startTime,endTime:s.endTime,status:s.status,checked:s.checked};sC();render()}
+function sC(){var o=S.checked.filter(function(x){return x.date!==S.selDate}),c=S.slots.filter(function(s){return s.checked}).map(function(s){return{date:S.selDate,startTime:s.startTime,endTime:s.endTime}});S.checked=o.concat(c)}
 
-function togSlot(idx){
-  var s=S.timeSlots[idx];if(['booked','mine','locked','disabled'].indexOf(s.status)>=0){if(s.status==='locked')toast('明天预约将于5:30开放','err');else if(s.status==='disabled')toast(s.disabledReason||'暂不可预约','err');else if(s.status==='mine')toast('您已预约该时段','err');return}
-  s.checked=!s.checked;S.timeSlots[idx]={startTime:s.startTime,endTime:s.endTime,status:s.status,checked:s.checked};syncChk();render()}
-function syncChk(){var o=S.checked.filter(function(x){return x.date!==S.selDate}),c=S.timeSlots.filter(function(s){return s.checked}).map(function(s){return{date:S.selDate,startTime:s.startTime,endTime:s.endTime}});S.checked=o.concat(c)}
-
-function rBar(){
-  if(S.page!=='booking')return h('div');
-  var c=S.timeSlots.filter(function(s){return s.checked}).length;
-  return h('div',{className:'submit-bar'+(c>0?' has':'')},[
-    h('div',{className:'submit-left'},c===0?h('span',{className:'submit-hint',text:'请选择需要预约的时段'}):h('span',{className:'submit-count',html:'已选 <b>'+c+'</b> 个时段'})),
-    h('button',{className:'submit-btn'+(c>0?' go':''),text:'提交预约',onclick:c>0?doSubmit:null})])}
+function rBar(){if(S.page!=='booking')return h('div');var c=S.slots.filter(function(s){return s.checked}).length;return h('div',{className:'submit-bar'+(c>0?' has':'')},[h('div',{className:'submit-left'},c===0?h('span',{className:'submit-hint',text:'请选择需要预约的时段'}):h('span',{className:'submit-count',html:'已选 <b>'+c+'</b> 个时段'})),h('button',{className:'submit-btn'+(c>0?' go':''),text:'提交预约',onclick:c>0?doSubmit:null})])}
 
 function doSubmit(){
-  var slots=S.checked,insts=getInsts(),inst=insts.find(function(i){return i.id===S.selInst}),uid=getUid();
-  if(slots.length===0){toast('请先选择时段','err');return}
-  for(var i=0;i<slots.length;i++){if(isTomorrow(slots[i].date)&&!isAfter530()){toast('明天预约将于5:30开放','err');return}}
+  var slots=S.checked,inst=cache.insts.find(function(i){return i.id===S.selInst});if(slots.length===0){toast('请先选择时段','err');return}
+  for(var i=0;i<slots.length;i++){if(iTmr(slots[i].date)&&!i530()){toast('明天预约将于5:30开放','err');return}}
   if(!inst||inst.status!=='active'){toast(inst?'该仪器暂不可预约':'仪器不存在','err');return}
-  var rv=getResvs(),now=Date.now(),fm=rv.filter(function(r){return r.userId===uid&&r.status==='active'&&slotUTC(r.date,r.startTime)>now});
-  var oi=fm.find(function(r){return r.instrumentId!==S.selInst});
-  if(oi){var on=insts.find(function(i){return i.id===oi.instrumentId});toast('您已预约"'+(on?on.name:'其他仪器')+'"，请先取消后再预约其他仪器','err');return}
-  var ar=rv.filter(function(r){return r.status==='active'&&r.instrumentId===S.selInst});
-  for(var j=0;j<slots.length;j++){if(ar.some(function(r){return r.date===slots[j].date&&r.startTime===slots[j].startTime&&r.userId!==uid})){toast(slots[j].date+' '+slots[j].startTime+' 已被他人预约','err');return}}
+  var fm=cache.resvs.filter(function(r){return r.user_id===UID&&r.status==='active'&&sUTC(r.date,r.start_time)>Date.now()}),oi=fm.find(function(r){return r.instrument_id!==S.selInst});
+  if(oi){var on=cache.insts.find(function(i){return i.id===oi.instrument_id});toast('您已预约"'+(on?on.name:'其他仪器')+'"，请先取消后再预约其他仪器','err');return}
+  var ar=cache.resvs.filter(function(r){return r.status==='active'&&r.instrument_id===S.selInst});
+  for(var j=0;j<slots.length;j++){if(ar.some(function(r){return r.date===slots[j].date&&r.start_time===slots[j].startTime&&r.user_id!==UID})){toast(slots[j].date+' '+slots[j].startTime+' 已被他人预约','err');return}}
   showForm(slots)
 }
 
 function showForm(slots){
   var t=slots.map(function(s){return s.date+' '+s.startTime+'-'+s.endTime}).join('<br>');
-  showModal({title:'填写预约信息',
-    body:'<div style="background:#E8F4F5;padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:13px;line-height:1.8"><strong>预约时段：</strong><br>'+t+'<br><span style="color:var(--text2)">共 '+slots.length+' 个时段</span></div>'+
-      '<div class="fg"><div class="fg-label">姓名 <span style="color:var(--red)">*</span></div><input class="fg-input" id="fn" placeholder="请输入您的姓名" maxlength="20"><div class="fg-err" id="fe1">请输入姓名</div></div>'+
-      '<div class="fg"><div class="fg-label">手机号 <span style="color:var(--red)">*</span></div><input class="fg-input" id="fp" placeholder="请输入手机号" maxlength="11" type="tel"><div class="fg-err" id="fe2">请输入有效手机号</div></div>'+
-      '<div class="fg"><div class="fg-label">备注</div><input class="fg-input" id="fnt" placeholder="选填（如实验名称）" maxlength="100"></div>',
-    footer:'<button class="btn btn-cancel" id="bc">取消</button><button class="btn btn-confirm" id="bok">确认预约</button>',
-    onShow:function(){
+  showModal({title:'填写预约信息',body:'<div style="background:#E8F4F5;padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:13px;line-height:1.8"><strong>预约时段：</strong><br>'+t+'<br><span style="color:var(--t2)">共 '+slots.length+' 个时段</span></div><div class="fg"><div class="fg-label">姓名 <span style="color:var(--r)">*</span></div><input class="fg-input" id="fn" placeholder="请输入您的姓名" maxlength="20"><div class="fg-err" id="fe1">请输入姓名</div></div><div class="fg"><div class="fg-label">手机号 <span style="color:var(--r)">*</span></div><input class="fg-input" id="fp" placeholder="请输入手机号" maxlength="11" type="tel"><div class="fg-err" id="fe2">请输入有效手机号</div></div><div class="fg"><div class="fg-label">备注</div><input class="fg-input" id="fnt" placeholder="选填（如实验名称）" maxlength="100"></div>',
+    footer:'<button class="btn btn-cancel" id="bc">取消</button><button class="btn btn-confirm" id="bok">确认预约</button>',onShow:function(){
       document.getElementById('bc').addEventListener('click',closeModal);
-      document.getElementById('bok').addEventListener('click',function(){
-        var n=(document.getElementById('fn').value||'').trim(),p=(document.getElementById('fp').value||'').trim(),nt=(document.getElementById('fnt').value||'').trim(),v=true;
-        if(!n){document.getElementById('fe1').style.display='block';document.getElementById('fn').classList.add('err');v=false}else{document.getElementById('fe1').style.display='none';document.getElementById('fn').classList.remove('err')}
-        if(!p||!/^1\d{10}$/.test(p)){document.getElementById('fe2').style.display='block';document.getElementById('fp').classList.add('err');v=false}else{document.getElementById('fe2').style.display='none';document.getElementById('fp').classList.remove('err')}
-        if(!v)return;closeModal();doBook(slots,n,p,nt)
-      })}})
-}
+      document.getElementById('bok').addEventListener('click',function(){var n=(document.getElementById('fn').value||'').trim(),p=(document.getElementById('fp').value||'').trim(),nt=(document.getElementById('fnt').value||'').trim(),v=true;if(!n){document.getElementById('fe1').style.display='block';document.getElementById('fn').classList.add('err');v=false}else{document.getElementById('fe1').style.display='none';document.getElementById('fn').classList.remove('err')}if(!p||!/^1\d{10}$/.test(p)){document.getElementById('fe2').style.display='block';document.getElementById('fp').classList.add('err');v=false}else{document.getElementById('fe2').style.display='none';document.getElementById('fp').classList.remove('err')}if(!v)return;closeModal();bkSlots(slots,n,p,nt)})}})}
 
-function doBook(slots,name,phone,notes){
-  var insts=getInsts(),inst=insts.find(function(i){return i.id===S.selInst}),uid=getUid(),rv=getResvs(),now=Date.now();
-  var ar=rv.filter(function(r){return r.status==='active'&&r.instrumentId===S.selInst});
-  for(var i=0;i<slots.length;i++){
-    if(ar.some(function(r){return r.date===slots[i].date&&r.startTime===slots[i].startTime&&r.userId!==uid})){toast(slots[i].date+' '+slots[i].startTime+' 已被他人预约','err');refresh();return}
-    if(slotUTC(slots[i].date,slots[i].startTime)<=now){toast('时段已过期','err');refresh();return}
-  }
-  var nr=slots.map(function(s){return{id:'r'+Date.now().toString(36)+Math.random().toString(36).slice(2,6),userId:uid,instrumentId:S.selInst,instrumentName:inst?inst.name:'',date:s.date,startTime:s.startTime,endTime:s.endTime,status:'active',name:name,phone:phone,notes:notes,bookedAt:new Date().toISOString()}});
-  saveResvs(rv.concat(nr));S.checked=[];toast('预约成功！'+nr.length+'个时段','ok');compSlots();render()
+async function bkSlots(slots,name,phone,notes){
+  ld('提交预约中…');var inst=cache.insts.find(function(i){return i.id===S.selInst});var now=Date.now();
+  for(var i=0;i<slots.length;i++){if(sUTC(slots[i].date,slots[i].startTime)<=now){unld();toast(slots[i].date+' '+slots[i].startTime+' 已过期','err');return}}
+  var rows=slots.map(function(s){return{user_id:UID,instrument_id:S.selInst,instrument_name:inst?inst.name:'',date:s.date,start_time:s.startTime,end_time:s.endTime,status:'active',name:name,phone:phone,notes:notes,booked_at:new Date().toISOString()}});
+  var r=await sb.from('reservations').insert(rows);
+  if(r.error){unld();toast('提交失败: '+r.error.message,'err');return}
+  await loadResvs();S.checked=[];unld();toast('预约成功！'+slots.length+'个时段','ok');cSlots();render()
 }
-function refresh(){S.checked=[];compSlots();render()}
 
 // ── 我的预约 ──
+var myData=[];
 function rMy(){
-  var w=h('div',{className:'page active'}),uid=getUid(),all=getResvs().filter(function(r){return r.userId===uid});
-  var al=all.filter(function(r){return r.status==='active'&&!isExpired(r.date,r.startTime)});
-  var hl=all.filter(function(r){return r.status!=='active'||isExpired(r.date,r.startTime)});
-  hl.sort(function(a,b){return b.date.localeCompare(a.date)||b.startTime.localeCompare(a.startTime)});
+  var w=h('div',{className:'page active'}),all=cache.myResvs||[];
+  var al=all.filter(function(r){return r.status==='active'&&!iExp(r.date,r.start_time)}),hl=all.filter(function(r){return r.status!=='active'||iExp(r.date,r.start_time)});
+  hl.sort(function(a,b){return (b.date||'').localeCompare(a.date||'')||(b.start_time||'').localeCompare(a.start_time||'')});
   var tr=h('div',{className:'booking-tabs'});tr.appendChild(h('div',{className:'btab'+(S.btab==='active'?' on':''),onclick:function(){S.btab='active';render()}},['进行中',al.length>0?h('span',{className:'bnum',text:String(al.length)}):null]));tr.appendChild(h('div',{className:'btab'+(S.btab==='history'?' on':''),onclick:function(){S.btab='history';render()}},'历史记录'));w.appendChild(tr);
   if(S.btab==='active'){if(al.length===0)w.appendChild(h('div',{className:'empty-box'},[h('div',{className:'eico',text:'📋'}),'暂无进行中的预约',h('div',{style:'font-size:12px;margin-top:4px',text:'去首页预约仪器吧'})]));else al.forEach(function(r){w.appendChild(rCard(r,true))})}
   else{if(hl.length===0)w.appendChild(h('div',{className:'empty-box'},[h('div',{className:'eico',text:'📭'}),'暂无历史记录']));else hl.forEach(function(r){w.appendChild(rCard(r,false))})}
   return w
 }
-function rCard(r,act){
-  var ex=isExpired(r.date,r.startTime),can=act&&!ex&&r.status==='active',st=r.status==='cancelled'?'已取消':(ex?'已过期':'进行中'),sc=r.status==='cancelled'?'can':((ex||r.status==='expired')?'exp':'act');
-  var c=h('div',{className:'bcard'+(act?'':' hist')});
-  c.appendChild(h('div',{className:'bcard-hd'},[h('div',{className:'bcard-name'},[h('span',{className:'mi',text:'🧬'}),r.instrumentName]),h('span',{className:'bcard-st '+sc,text:st})]));
-  c.appendChild(h('div',{className:'bcard-bd'},[rLine('预约日期',r.date+' '+getWeekZh(r.date)),rLine('预约时段',r.startTime+' - '+r.endTime),rLine('预约人',(r.name||'')+' '+(r.phone||'')),r.notes?rLine('备注',r.notes):null,rLine('提交时间',r.bookedAt?fmtDate(new Date(r.bookedAt),'YYYY-MM-DD HH:mm'):'')]));
-  if(act)c.appendChild(h('div',{className:'bcard-ft'},[can?h('button',{className:'btn-sm danger',text:'取消预约',onclick:function(){cancelBk(r.id)}}):h('button',{className:'btn-sm ghost',text:ex?'已过期':'不可取消'})]));
-  return c
-}
-function rLine(l,v){return h('div',{className:'bcard-row'},[h('span',{className:'lbl',text:l}),h('span',{className:'val',text:v})])}
-function cancelBk(bid){
-  var rv=getResvs(),r=rv.find(function(x){return x.id===bid});if(!r){toast('预约不存在','err');return}if(r.userId!==getUid()){toast('无权操作','err');return}if(!isExpired(r.date,r.startTime)&&r.status==='active'){showModal({title:'确认取消',body:'<p style="line-height:1.8">取消后该时段将释放。<br><strong>'+r.date+' '+r.startTime+'-'+r.endTime+'</strong><br>确定取消？</p>',footer:'<button class="btn btn-cancel" id="bcn">我再想想</button><button class="btn btn-confirm danger" id="bcy">确定取消</button>',onShow:function(){document.getElementById('bcn').addEventListener('click',closeModal);document.getElementById('bcy').addEventListener('click',function(){closeModal();var l=getResvs(),f=l.find(function(x){return x.id===bid});if(f){f.status='cancelled';f.cancelledAt=new Date().toISOString()}saveResvs(l);toast('已取消','ok');render()})}})}else{toast('已过期，无法取消','err')}
-}
+function rCard(r,act){var ex=iExp(r.date,r.start_time),can=act&&!ex&&r.status==='active',st=r.status==='cancelled'?'已取消':(ex?'已过期':'进行中'),sc=r.status==='cancelled'?'can':((ex||r.status==='expired')?'exp':'act');var c=h('div',{className:'bcard'+(act?'':' hist')});c.appendChild(h('div',{className:'bcard-hd'},[h('div',{className:'bcard-name'},[h('span',{className:'mi',text:'🧬'}),r.instrument_name]),h('span',{className:'bcard-st '+sc,text:st})]));c.appendChild(h('div',{className:'bcard-bd'},[rL('预约日期',r.date+' '+wkZh(r.date)),rL('预约时段',r.start_time+' - '+r.end_time),rL('预约人',(r.name||'')+' '+(r.phone||'')),r.notes?rL('备注',r.notes):null,rL('提交时间',r.booked_at?fmD(new Date(r.booked_at),'YYYY-MM-DD HH:mm'):'')]));if(act)c.appendChild(h('div',{className:'bcard-ft'},[can?h('button',{className:'btn-sm danger',text:'取消预约',onclick:function(){cancelBk(r.id)}}):h('button',{className:'btn-sm ghost',text:ex?'已过期':'不可取消'})]));return c}
+function rL(l,v){return h('div',{className:'bcard-row'},[h('span',{className:'lbl',text:l}),h('span',{className:'val',text:v})])}
+async function cancelBk(bid){ld('取消中…');var r=await sb.from('reservations').update({status:'cancelled',cancelled_at:new Date().toISOString()}).eq('id',bid).eq('user_id',UID);if(r.error){unld();toast('取消失败: '+r.error.message,'err');return}await loadResvs();cache.myResvs=await loadMyResvs();unld();toast('已取消','ok');render()}
 
 // ── 管理页 ──
-function rAdmin(){
-  var w=h('div',{className:'page active'}),insts=getInsts(),sm={active:'正常',maintenance:'维修中',broken:'故障'};
-  w.appendChild(h('div',{style:'padding:20px 16px 8px;font-size:18px;font-weight:700',text:'仪器管理'}));
-  w.appendChild(h('div',{style:'padding:0 16px 16px;font-size:12px;color:var(--text2)',text:'管理仪器信息与状态'}));
-  insts.forEach(function(x){w.appendChild(h('div',{className:'adm-card'},[h('div',{className:'adm-left'},[h('div',{className:'adm-name'},[h('span',{text:'🧬'}),x.name]),h('div',{className:'adm-loc',text:'📍 '+(x.location||'未设置')})]),h('div',{className:'adm-right'},[h('span',{className:'adm-st '+(x.status==='active'?'act':x.status==='maintenance'?'mt':'br'),text:sm[x.status]||x.status}),h('span',{className:'adm-edit',text:'✏️ 编辑',onclick:function(){edInst(x)}})])]))});return w
-}
+function rAdm(){var w=h('div',{className:'page active'}),sm={active:'正常',maintenance:'维修中',broken:'故障'};w.appendChild(h('div',{style:'padding:20px 16px 8px;font-size:18px;font-weight:700',text:'仪器管理'}));w.appendChild(h('div',{style:'padding:0 16px 16px;font-size:12px;color:var(--t2)',text:'管理仪器信息与状态'}));cache.insts.forEach(function(x){w.appendChild(h('div',{className:'adm-card'},[h('div',{className:'adm-l'},[h('div',{className:'adm-name'},[h('span',{text:'🧬'}),x.name]),h('div',{className:'adm-loc',text:'📍 '+(x.location||'未设置')})]),h('div',{className:'adm-r'},[h('span',{className:'adm-st '+(x.status==='active'?'act':x.status==='maintenance'?'mt':'br'),text:sm[x.status]||x.status}),h('span',{className:'adm-edit',text:'✏️ 编辑',onclick:function(){edInst(x)}})])]))});return w}
+
 function edInst(orig){
   var ei={id:orig.id,name:orig.name||'',location:orig.location||'',status:orig.status||'active'},os=orig.status,cm=false;
-  function ckW(st){if(os==='active'&&st!=='active'){var f=getResvs().filter(function(r){return r.instrumentId===ei.id&&r.status==='active'&&slotUTC(r.date,r.startTime)>Date.now()});if(f.length>0)return{msg:'该仪器未来有 '+f.length+' 条有效预约。修改状态后新预约将被禁止，但已有预约不会被自动取消。',bks:f.slice(0,10)}}return null}
-  function rM(){
-    document.getElementById('modal-container').innerHTML='';var w=ckW(ei.status),la={active:'🟢 正常（可预约）',maintenance:'🟡 维修中（不可预约）',broken:'🔴 故障（不可预约）'};
-    var bd='';bd+='<div class="fg"><div class="fg-label">仪器名称</div><input class="fg-input" id="en" value="'+esc(ei.name)+'" placeholder="请输入仪器名称"></div>';
-    bd+='<div class="fg"><div class="fg-label">放置位置</div><input class="fg-input" id="el" value="'+esc(ei.location)+'" placeholder="请输入放置位置"></div>';
-    bd+='<div class="fg"><div class="fg-label">仪器状态</div><div class="st-options">';
-    ['active','maintenance','broken'].forEach(function(v){bd+='<div class="st-opt'+(ei.status===v?' sel':'')+'" data-v="'+v+'" id="so-'+v+'"><div class="st-dot'+(ei.status===v?' chk':'')+'"></div>'+la[v]+'</div>'});
-    bd+='</div></div>';
-    if(w&&w.bks&&w.bks.length>0&&cm){bd+='<div class="warn-box"><div class="warn-ico">⚠️</div><div class="warn-content"><span class="warn-ttl">注意：存在未来预约</span><span style="color:#795548">'+esc(w.msg)+'</span><ul class="warn-list">';w.bks.forEach(function(b){bd+='<li>• '+b.date+' '+b.startTime+'-'+b.endTime+'（'+(b.name||'')+'）</li>'});bd+='</ul></div></div>'}
-    var bt=(w&&!cm)?'确认修改（已知晓影响）':'保存修改',ft='<button class="btn btn-cancel" id="bcl">取消</button><button class="btn btn-confirm" id="bsm">'+bt+'</button>';
-    var ov=document.createElement('div');ov.className='modal-overlay';ov.addEventListener('click',function(e){if(e.target===ov)closeModal()});
-    var sh=document.createElement('div');sh.className='modal-sheet';sh.innerHTML='<div class="modal-hd"><span class="modal-title">编辑仪器</span><span class="modal-close" id="mcl">✕</span></div><div class="modal-bd">'+bd+'</div><div class="modal-ft">'+ft+'</div>';
-    ov.appendChild(sh);document.getElementById('modal-container').appendChild(ov);
-    document.getElementById('mcl').addEventListener('click',closeModal);document.getElementById('bcl').addEventListener('click',closeModal);
-    document.getElementById('en').addEventListener('input',function(){ei.name=this.value});document.getElementById('el').addEventListener('input',function(){ei.location=this.value});
-    ['active','maintenance','broken'].forEach(function(v){var el=document.getElementById('so-'+v);if(el)el.addEventListener('click',function(){ei.status=el.getAttribute('data-v');rM()})});
-    document.getElementById('bsm').addEventListener('click',function(){
-      ei.name=document.getElementById('en').value.trim();ei.location=document.getElementById('el').value.trim();if(!ei.name){toast('请输入仪器名称','err');return}
-      var w2=ckW(ei.status);if(w2&&!cm){cm=true;rM();return}
-      var lst=getInsts(),idx=lst.findIndex(function(i){return i.id===ei.id});if(idx>=0){lst[idx].name=ei.name;lst[idx].location=ei.location;lst[idx].status=ei.status}saveInsts(lst);closeModal();toast('保存成功','ok');render()})}
-  rM()
-}
+  function ckW(st){if(os==='active'&&st!=='active'){var f=cache.resvs.filter(function(r){return r.instrument_id===ei.id&&r.status==='active'&&sUTC(r.date,r.start_time)>Date.now()});if(f.length>0)return{msg:'该仪器未来有 '+f.length+' 条有效预约。修改状态后新预约将被禁止。',bks:f.slice(0,10)}}return null}
+  function rM(){document.getElementById('modal-container').innerHTML='';var w=ckW(ei.status),la={active:'🟢 正常（可预约）',maintenance:'🟡 维修中（不可预约）',broken:'🔴 故障（不可预约）'};var bd='';bd+='<div class="fg"><div class="fg-label">仪器名称</div><input class="fg-input" id="en" value="'+esc(ei.name)+'" placeholder="请输入仪器名称"></div>';bd+='<div class="fg"><div class="fg-label">放置位置</div><input class="fg-input" id="el" value="'+esc(ei.location)+'" placeholder="请输入放置位置"></div>';bd+='<div class="fg"><div class="fg-label">仪器状态</div><div class="st-options">';['active','maintenance','broken'].forEach(function(v){bd+='<div class="st-opt'+(ei.status===v?' sel':'')+'" data-v="'+v+'" id="so-'+v+'"><div class="st-dot'+(ei.status===v?' chk':'')+'"></div>'+la[v]+'</div>'});bd+='</div></div>';if(w&&w.bks&&w.bks.length>0&&cm){bd+='<div class="warn-box"><div class="warn-ico">⚠️</div><div class="warn-content"><span class="warn-ttl">注意：存在未来预约</span><span style="color:#795548">'+esc(w.msg)+'</span><ul class="warn-list">';w.bks.forEach(function(b){bd+='<li>• '+b.date+' '+b.start_time+'-'+b.end_time+'（'+(b.name||'')+'）</li>'});bd+='</ul></div></div>'}var bt=(w&&!cm)?'确认修改（已知晓影响）':'保存修改',ft='<button class="btn btn-cancel" id="bcl">取消</button><button class="btn btn-confirm" id="bsm">'+bt+'</button>';var ov=document.createElement('div');ov.className='modal-overlay';ov.addEventListener('click',function(e){if(e.target===ov)closeModal()});var sh=document.createElement('div');sh.className='modal-sheet';sh.innerHTML='<div class="modal-hd"><span class="modal-title">编辑仪器</span><span class="modal-close" id="mcl">✕</span></div><div class="modal-bd">'+bd+'</div><div class="modal-ft">'+ft+'</div>';ov.appendChild(sh);document.getElementById('modal-container').appendChild(ov);document.getElementById('mcl').addEventListener('click',closeModal);document.getElementById('bcl').addEventListener('click',closeModal);document.getElementById('en').addEventListener('input',function(){ei.name=this.value});document.getElementById('el').addEventListener('input',function(){ei.location=this.value});['active','maintenance','broken'].forEach(function(v){var el=document.getElementById('so-'+v);if(el)el.addEventListener('click',function(){ei.status=el.getAttribute('data-v');rM()})});document.getElementById('bsm').addEventListener('click',async function(){ei.name=document.getElementById('en').value.trim();ei.location=document.getElementById('el').value.trim();if(!ei.name){toast('请输入仪器名称','err');return}var w2=ckW(ei.status);if(w2&&!cm){cm=true;rM();return}ld('保存中…');var r=await sb.from('instruments').update({name:ei.name,location:ei.location,status:ei.status}).eq('id',ei.id);if(r.error){unld();toast('保存失败: '+r.error.message,'err');return}await loadInsts();closeModal();unld();toast('保存成功','ok');render()})}rM()}
 
 // ==================== 启动 ====================
-function init(){S.today=todayStr();S.selDate=S.today;var i=getInsts();if(i.length>0)S.selInst=i[0].id;compSlots();render()}
+async function init(){
+  ld('连接数据库…');
+  try{await loadInsts();await loadResvs();cache.myResvs=await loadMyResvs()}catch(e){unld();toast('数据库连接失败: '+e.message,'err');return}
+  S.today=tdy();S.selDate=S.today;if(cache.insts.length>0)S.selInst=cache.insts[0].id;cSlots();unld();render()
+}
 init();
 </script>
 </body>
