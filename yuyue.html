@@ -154,7 +154,7 @@ function h(t,a,c){var e=document.createElement(t);if(a)for(var k in a){if(k==='c
 
 function render(){var a=document.getElementById('app');a.innerHTML='';a.appendChild(rNav());if(S.page==='booking')a.appendChild(rBook());else if(S.page==='mybookings')a.appendChild(rMy());else if(S.page==='admin')a.appendChild(rAdm());a.appendChild(rBar())}
 
-function rNav(){var n=cache.resvs.filter(function(r){return r.user_id===UID&&r.status==='active'&&!iExp(r.date,r.start_time)}).length;return h('div',{className:'nav-bar'},[h('div',{className:'nav-item'+(S.page==='booking'?' on':''),onclick:function(){S.page='booking';cSlots();render()}},'预约仪器'),h('div',{className:'nav-item'+(S.page==='mybookings'?' on':''),onclick:async function(){S.page='mybookings';ld('加载预约…');cache.myResvs=await loadMyResvs();unld();render()}},['我的预约',n>0?h('span',{className:'nav-badge',text:String(n)}):null]),h('div',{className:'nav-item'+(S.page==='admin'?' on':''),onclick:async function(){S.page='admin';ld();await loadInsts();unld();render()}},'仪器管理')])}
+function rNav(){var n=cache.resvs.filter(function(r){return r.user_id===UID&&r.status==='active'&&!iExp(r.date,r.start_time)}).length;return h('div',{className:'nav-bar'},[h('div',{className:'nav-item'+(S.page==='booking'?' on':''),onclick:function(){S.page='booking';cSlots();render()}},'预约仪器'),h('div',{className:'nav-item'+(S.page==='mybookings'?' on':''),onclick:async function(){S.page='mybookings';ld('加载预约…');cache.myResvs=await loadMyResvs();unld();render()}},['我的预约',n>0?h('span',{className:'nav-badge',text:String(n)}):null]),h('div',{className:'nav-item'+(S.page==='admin'?' on':''),onclick:goAdmin},'仪器管理')])}
 
 function rBook(){
   var insts=cache.insts;if(!S.selInst&&insts.length)S.selInst=insts[0].id;
@@ -231,6 +231,37 @@ function rMy(){
 function rCard(r,act){var ex=iExp(r.date,r.start_time),can=act&&!ex&&r.status==='active',st=r.status==='cancelled'?'已取消':(ex?'已过期':'进行中'),sc=r.status==='cancelled'?'can':((ex||r.status==='expired')?'exp':'act');var c=h('div',{className:'bcard'+(act?'':' hist')});c.appendChild(h('div',{className:'bcard-hd'},[h('div',{className:'bcard-name'},[h('span',{className:'mi',text:'🧬'}),r.instrument_name]),h('span',{className:'bcard-st '+sc,text:st})]));c.appendChild(h('div',{className:'bcard-bd'},[rL('预约日期',r.date+' '+wkZh(r.date)),rL('预约时段',r.start_time+' - '+r.end_time),rL('预约人',(r.name||'')+' '+(r.phone||'')),r.notes?rL('备注',r.notes):null,rL('提交时间',r.booked_at?fmD(new Date(r.booked_at),'YYYY-MM-DD HH:mm'):'')]));if(act)c.appendChild(h('div',{className:'bcard-ft'},[can?h('button',{className:'btn-sm danger',text:'取消预约',onclick:function(){cancelBk(r.id)}}):h('button',{className:'btn-sm ghost',text:ex?'已过期':'不可取消'})]));return c}
 function rL(l,v){return h('div',{className:'bcard-row'},[h('span',{className:'lbl',text:l}),h('span',{className:'val',text:v})])}
 async function cancelBk(bid){ld('取消中…');var r=await sb.from('reservations').update({status:'cancelled',cancelled_at:new Date().toISOString()}).eq('id',bid).eq('user_id',UID);if(r.error){unld();toast('取消失败: '+r.error.message,'err');return}await loadResvs();cache.myResvs=await loadMyResvs();unld();toast('已取消','ok');render()}
+
+// ── 管理页入口 ──
+async function goAdmin(){
+  ld('验证中…');
+  var r=await sb.from('settings').select('value').eq('key','admin_password').maybeSingle();
+  unld();
+  if(!r.data){showSetPwd()}else{showAskPwd(r.data.value)}
+}
+function showSetPwd(){
+  showModal({title:'设置管理员密码',body:'<p style="font-size:14px;color:var(--t2);margin-bottom:12px">首次使用，请设置管理员密码。修改仪器状态需要此密码。</p><div class="fg"><div class="fg-label">管理员密码</div><input class="fg-input" id="pwd1" type="password" placeholder="请输入密码（至少4位）" maxlength="20"></div><div class="fg"><div class="fg-label">确认密码</div><input class="fg-input" id="pwd2" type="password" placeholder="请再次输入密码" maxlength="20"><div class="fg-err" id="perr" style="display:none"></div></div>',
+    footer:'<button class="btn btn-cancel" id="bcl2">取消</button><button class="btn btn-confirm" id="bsm2">设置密码</button>',onShow:function(){
+      document.getElementById('bcl2').addEventListener('click',closeModal);
+      document.getElementById('bsm2').addEventListener('click',async function(){
+        var p1=(document.getElementById('pwd1').value||'').trim(),p2=(document.getElementById('pwd2').value||'').trim();
+        if(!p1||p1.length<4){var pe=document.getElementById('perr');pe.textContent='密码至少4位';pe.style.display='block';return}
+        if(p1!==p2){var pe2=document.getElementById('perr');pe2.textContent='两次密码不一致';pe2.style.display='block';return}
+        closeModal();ld('保存中…');
+        await sb.from('settings').upsert({key:'admin_password',value:p1},{onConflict:'key'});
+        unld();toast('密码设置成功','ok');S.page='admin';ld();await loadInsts();unld();render()
+      })}})}
+
+function showAskPwd(correct){
+  showModal({title:'请输入管理员密码',body:'<div class="fg"><input class="fg-input" id="pwdin" type="password" placeholder="请输入管理员密码" maxlength="20"><div class="fg-err" id="perr2" style="display:none">密码错误</div></div>',
+    footer:'<button class="btn btn-cancel" id="bcl3">取消</button><button class="btn btn-confirm" id="bsm3">确认</button>',onShow:function(){
+      document.getElementById('bcl3').addEventListener('click',closeModal);
+      document.getElementById('bsm3').addEventListener('click',async function(){
+        var p=(document.getElementById('pwdin').value||'').trim();
+        if(p!==correct){document.getElementById('perr2').style.display='block';return}
+        closeModal();S.page='admin';ld();await loadInsts();unld();render()
+      })
+    }})}
 
 // ── 管理页 ──
 function rAdm(){var w=h('div',{className:'page active'}),sm={active:'正常',maintenance:'维修中',broken:'故障'};w.appendChild(h('div',{style:'padding:20px 16px 8px;font-size:18px;font-weight:700',text:'仪器管理'}));w.appendChild(h('div',{style:'padding:0 16px 16px;font-size:12px;color:var(--t2)',text:'管理仪器信息与状态'}));cache.insts.forEach(function(x){w.appendChild(h('div',{className:'adm-card'},[h('div',{className:'adm-l'},[h('div',{className:'adm-name'},[h('span',{text:'🧬'}),x.name]),h('div',{className:'adm-loc',text:'📍 '+(x.location||'未设置')})]),h('div',{className:'adm-r'},[h('span',{className:'adm-st '+(x.status==='active'?'act':x.status==='maintenance'?'mt':'br'),text:sm[x.status]||x.status}),h('span',{className:'adm-edit',text:'✏️ 编辑',onclick:function(){edInst(x)}})])]))});return w}
