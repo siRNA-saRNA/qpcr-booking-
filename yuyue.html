@@ -123,7 +123,7 @@ var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 function bjNow(){return new Date()}
 function fmD(d,f){var m={YYYY:d.getFullYear(),MM:String(d.getMonth()+1).padStart(2,'0'),DD:String(d.getDate()).padStart(2,'0'),HH:String(d.getHours()).padStart(2,'0'),mm:String(d.getMinutes()).padStart(2,'0')};return f.replace(/YYYY|MM|DD|HH|mm/g,function(k){return m[k]})}
 function tdy(){return fmD(bjNow(),'YYYY-MM-DD')}
-function i530(){var d=bjNow();return d.getHours()>5||(d.getHours()===5&&d.getMinutes()>=30)}
+function i530(){var d=bjNow();return d.getHours()>17||(d.getHours()===17&&d.getMinutes()>=30)}
 function iTmr(s){var t=new Date();t.setDate(t.getDate()+1);return s===fmD(t,'YYYY-MM-DD')}
 function wkZh(s){return['周日','周一','周二','周三','周四','周五','周六'][new Date(s+'T12:00:00+08:00').getDay()]}
 function sUTC(ds,ts){var h=ts.split(':').map(Number);return Date.UTC(+ds.slice(0,4),+ds.slice(5,7)-1,+ds.slice(8,10),h[0]-8,h[1])}
@@ -164,7 +164,7 @@ function rBook(){
   var w=h('div',{className:'page active'});
   w.appendChild(h('div',{className:'cal-wrap'},h('div',{className:'cal-row'},dl.map(function(dd){var cl='day-chip';if(dd.ds===S.today)cl+=' today';if(dd.ds===S.selDate)cl+=' on';return h('div',{className:cl,onclick:function(){S.selDate=dd.ds;S.checked=[];cSlots();render()}},[h('span',{className:'dw',text:dd.wk}),h('span',{className:'dn',text:dd.day})])}))));
   w.appendChild(h('div',{className:'inst-wrap'},[h('div',{className:'sec-label'},[h('span',{className:'ico',text:'🧬'}),'选择仪器',h('span',{className:'sec-hint',text:'（同一时间只能预约一台）'})]),h('div',{className:'inst-grid'},insts.map(function(x){var cl='inst-chip';if(x.id===S.selInst)cl+=' on';return h('div',{className:cl,onclick:function(){S.selInst=x.id;S.checked=[];cSlots();render()}},[h('div',{className:'inst-dot '+(x.status==='active'?'green':'gray')}),h('div',{className:'inst-info'},[h('span',{className:'inst-name',text:x.name}),h('span',{className:'inst-loc',text:x.location||''})]),x.status==='maintenance'?h('span',{className:'inst-tag mt',text:'维修中'}):null,x.status==='broken'?h('span',{className:'inst-tag br',text:'故障'}):null])}))]));
-  if(S.s530)w.appendChild(h('div',{className:'alert alert-warn',text:'⏰ 明天仪器预约将于每日 5:30 开放'}));
+  if(S.s530)w.appendChild(h('div',{className:'alert alert-warn',text:'⏰ 未来日期预约将于每日 17:30 开放'}));
   if(S.dr)w.appendChild(h('div',{className:'alert alert-err',text:'⚠️ '+S.dr}));
   var ss=h('div',{className:'slot-wrap'});ss.appendChild(h('div',{className:'sec-label'},[h('span',{className:'ico',text:'🕐'}),S.selDate+' 可约时段',h('span',{className:'sec-badge',text:S.slots.length+'个'})]));
   if(S.slots.length===0)ss.appendChild(h('div',{className:'empty-box'},[h('div',{className:'eico',text:'📭'}),'暂无可用时段']));
@@ -183,14 +183,14 @@ function cSlots(){
   var cs={};S.checked.filter(function(x){return x.date===S.selDate}).forEach(function(x){cs[x.startTime]=true});
   slots.forEach(function(s){s.checked=cs[s.startTime]&&s.status==='free'});S.slots=slots
 }
-function togS(idx){var s=S.slots[idx];if(['booked','mine','locked','disabled'].indexOf(s.status)>=0){if(s.status==='locked')toast('明天预约将于5:30开放','err');else if(s.status==='disabled')toast(s.disabledReason||'暂不可预约','err');else if(s.status==='mine')toast('您已预约该时段','err');return}s.checked=!s.checked;S.slots[idx]={startTime:s.startTime,endTime:s.endTime,status:s.status,checked:s.checked};sC();render()}
+function togS(idx){var s=S.slots[idx];if(['booked','mine','locked','disabled'].indexOf(s.status)>=0){if(s.status==='locked')toast('未来日期预约将于每日17:30开放','err');else if(s.status==='disabled')toast(s.disabledReason||'暂不可预约','err');else if(s.status==='mine')toast('您已预约该时段','err');return}s.checked=!s.checked;S.slots[idx]={startTime:s.startTime,endTime:s.endTime,status:s.status,checked:s.checked};sC();render()}
 function sC(){var o=S.checked.filter(function(x){return x.date!==S.selDate}),c=S.slots.filter(function(s){return s.checked}).map(function(s){return{date:S.selDate,startTime:s.startTime,endTime:s.endTime}});S.checked=o.concat(c)}
 
 function rBar(){if(S.page!=='booking')return h('div');var c=S.slots.filter(function(s){return s.checked}).length;return h('div',{className:'submit-bar'+(c>0?' has':'')},[h('div',{className:'submit-left'},c===0?h('span',{className:'submit-hint',text:'请选择需要预约的时段'}):h('span',{className:'submit-count',html:'已选 <b>'+c+'</b> 个时段'})),h('button',{className:'submit-btn'+(c>0?' go':''),text:'提交预约',onclick:c>0?doSubmit:null})])}
 
 function doSubmit(){
   var slots=S.checked,inst=cache.insts.find(function(i){return i.id===S.selInst});if(slots.length===0){toast('请先选择时段','err');return}
-  for(var i=0;i<slots.length;i++){if(iTmr(slots[i].date)&&!i530()){toast('明天预约将于5:30开放','err');return}}
+  for(var i=0;i<slots.length;i++){if(iTmr(slots[i].date)&&!i530()){toast('未来日期预约将于每日17:30开放','err');return}}
   if(!inst||inst.status!=='active'){toast(inst?'该仪器暂不可预约':'仪器不存在','err');return}
   var fm=cache.resvs.filter(function(r){return r.user_id===UID&&r.status==='active'&&sUTC(r.date,r.start_time)>Date.now()}),oi=fm.find(function(r){return r.instrument_id!==S.selInst});
   if(oi){var on=cache.insts.find(function(i){return i.id===oi.instrument_id});toast('您已预约"'+(on?on.name:'其他仪器')+'"，请先取消后再预约其他仪器','err');return}
