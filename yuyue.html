@@ -178,7 +178,7 @@ function cSlots(){
   var slots=DFT_SLOTS.map(function(s){return{startTime:s.st,endTime:s.et,status:'free'}});
   if(dr){S.slots=slots.map(function(s){s.status='disabled';s.disabledReason=dr;return s});S.s530=false;return}
   var bs={},ms={};cache.resvs.forEach(function(r){if(r.status==='active'&&r.instrument_id===S.selInst&&r.date===S.selDate){if(r.user_id===UID)ms[r.start_time]=true;else bs[r.start_time]=true}});
-  var lk=(S.selDate!==S.today&&iTmr(S.selDate)&&!i530());S.s530=lk;
+  var lk=(S.selDate>S.today&&!i530());S.s530=lk;
   slots.forEach(function(s){if(lk)s.status='locked';else if(ms[s.startTime])s.status='mine';else if(bs[s.startTime])s.status='booked'});
   var cs={};S.checked.filter(function(x){return x.date===S.selDate}).forEach(function(x){cs[x.startTime]=true});
   slots.forEach(function(s){s.checked=cs[s.startTime]&&s.status==='free'});S.slots=slots
