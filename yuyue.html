@@ -11,7 +11,7 @@
 <meta itemprop="description" content="实验室qPCR仪器预约系统 · 快速预约">
 <meta itemprop="image" content="https://siRNA-saRNA.github.io/qpcr-booking-/icon.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%232B7C85'/><text x='50' y='68' text-anchor='middle' font-size='50' font-family='sans-serif' fill='white'>🧬</text></svg>">
-<title>qPCR仪器预约</title>
+<title>qPCR仪器预约 v6</title>
 <style>
 :root{--c1:#2B7C85;--c2:#1A5C63;--g:#27AE60;--r:#E74C3C;--o:#F39C12;--b:#3498DB;--bg:#F0F4F5;--card:#fff;--t:#1E2D2F;--t2:#7B8D8F;--s:0 2px 12px rgba(0,0,0,.06)}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -150,7 +150,7 @@ async function loadMyResvs(){var r=await sb.from('reservations').select('*').eq(
 var S={page:'booking',selDate:tdy(),today:tdy(),selInst:'',slots:[],checked:[],s530:false,instSt:'active',dr:null,btab:'active'};
 
 // ==================== 渲染 ====================
-function h(t,a,c){var e=document.createElement(t);if(a)for(var k in a){if(k==='className')e.className=a[k];else if(k==='style')Object.assign(e.style,a[k]);else if(k.startsWith('on'))e.addEventListener(k.slice(2).toLowerCase(),a[k]);else if(k==='text')e.textContent=a[k];else if(k==='html')e.innerHTML=a[k];else e.setAttribute(k,a[k])}if(c){if(typeof c==='string'||typeof c==='number')e.textContent=c;else if(Array.isArray(c))c.forEach(function(x){if(x!=null)e.appendChild(typeof x==='string'?document.createTextNode(x):x)});else e.appendChild(c)}return e}
+function h(t,a,c){var e=document.createElement(t);if(a)for(var k in a){if(k==='className')e.className=a[k];else if(k==='style'){if(typeof a[k]==='string')e.style.cssText=a[k];else Object.assign(e.style,a[k])}else if(k.startsWith('on'))e.addEventListener(k.slice(2).toLowerCase(),a[k]);else if(k==='text')e.textContent=a[k];else if(k==='html')e.innerHTML=a[k];else e.setAttribute(k,a[k])}if(c){if(typeof c==='string'||typeof c==='number')e.textContent=c;else if(Array.isArray(c))c.forEach(function(x){if(x!=null)e.appendChild(typeof x==='string'?document.createTextNode(x):x)});else e.appendChild(c)}return e}
 
 function render(){var a=document.getElementById('app');a.innerHTML='';a.appendChild(rNav());if(S.page==='booking')a.appendChild(rBook());else if(S.page==='mybookings')a.appendChild(rMy());else if(S.page==='admin')a.appendChild(rAdm());a.appendChild(rBar())}
 
