@@ -249,7 +249,7 @@ function showSetPwd(){
         if(p1!==p2){var pe2=document.getElementById('perr');pe2.textContent='两次密码不一致';pe2.style.display='block';return}
         closeModal();ld('保存中…');
         await sb.from('settings').upsert({key:'admin_password',value:p1},{onConflict:'key'});
-        unld();toast('密码设置成功','ok');S.page='admin';ld();await loadInsts();unld();render()
+        unld();toast('密码设置成功','ok');S.page='admin';render()
       })}})}
 
 function showAskPwd(correct){
@@ -259,7 +259,7 @@ function showAskPwd(correct){
       document.getElementById('bsm3').addEventListener('click',async function(){
         var p=(document.getElementById('pwdin').value||'').trim();
         if(p!==correct){document.getElementById('perr2').style.display='block';return}
-        closeModal();S.page='admin';ld();await loadInsts();unld();render()
+        closeModal();S.page='admin';render()
       })
     }})}
 
