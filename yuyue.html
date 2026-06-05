@@ -116,7 +116,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Segoe UI',sans-
 // ==================== Supabase 初始化 ====================
 var SUPABASE_URL = "https://xnayjzwkailupwjsjpvr.supabase.co";
 var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhuYXlqendrYWlsdXB3anNqcHZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA2MzA0NTMsImV4cCI6MjA5NjIwNjQ1M30.V61HUqbFEQULhsrMA0Drzfuvl8QH_A6SEoC8Qy8HhUA";
-var sb;try{sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY)}catch(e){document.getElementById('loader').classList.add('hide');document.getElementById('app').innerHTML='<div style="padding:60px 20px;text-align:center"><h3>SDK加载失败</h3><p style="color:var(--t2)">请刷新页面重试</p></div>';throw e}
+var sb,initOK=false;try{sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);initOK=true}catch(e){console.error(e);initOK=false}
 
 // ==================== 北京时间工具 ====================
 // 直接用浏览器本地时间（中国用户本地时区=UTC+8=北京时间）
@@ -275,13 +275,19 @@ function edInst(orig){
 
 // ==================== 启动 ====================
 async function init(){
-  ld('连接数据库…');
-  var ok=false;
-  var tmr=setTimeout(function(){if(!ok){unld();document.getElementById('app').innerHTML='<div style="padding:60px 20px;text-align:center"><div style="font-size:50px;margin-bottom:16px">⏳</div><h3>连接超时</h3><p style="color:var(--t2);margin:8px 0">数据库响应过慢，请检查网络后刷新</p><button onclick="location.reload()" style="margin-top:16px;padding:12px 32px;border-radius:24px;background:var(--c1);color:#fff;border:none;font-size:15px;cursor:pointer">重新加载</button></div>'}},10000);
-  try{await loadInsts();await loadResvs();cache.myResvs=await loadMyResvs()}catch(e){clearTimeout(tmr);unld();toast('数据库连接失败: '+e.message,'err');return}
-  clearTimeout(tmr);ok=true;
+  S.today=tdy();S.selDate=S.today;
+  // 先用默认数据渲染，避免白屏
+  cache.insts=[{id:'i1',name:'7500-1',location:'四楼',status:'active'},{id:'i2',name:'7500-2',location:'四楼',status:'active'},{id:'i3',name:'7500-3',location:'四楼',status:'active'},{id:'i4',name:'7500-4',location:'四楼',status:'active'},{id:'i5',name:'7500-5',location:'四楼',status:'active'},{id:'i6',name:'7500-6',location:'三楼',status:'active'},{id:'i7',name:'7500-7',location:'三楼',status:'active'}];
+  S.selInst=cache.insts[0].id;cSlots();render();unld();
+
+  if(!initOK){toast('数据库未连接，数据不会保存','err');return}
+
+  // 后台加载云端数据
+  try{await loadInsts();await loadResvs();cache.myResvs=await loadMyResvs()}catch(e){toast('数据加载失败，使用本地缓存','err')}
+  if(cache.insts.length>0)S.selInst=cache.insts[0].id;else cache.insts=[{id:'i1',name:'7500-1',location:'四楼',status:'active'},{id:'i2',name:'7500-2',location:'四楼',status:'active'},{id:'i3',name:'7500-3',location:'四楼',status:'active'},{id:'i4',name:'7500-4',location:'四楼',status:'active'},{id:'i5',name:'7500-5',location:'四楼',status:'active'},{id:'i6',name:'7500-6',location:'三楼',status:'active'},{id:'i7',name:'7500-7',location:'三楼',status:'active'}];
+  cSlots();render();
+  // 后台清理
   try{var d15=new Date(Date.now()-15*86400000).toISOString();await sb.from('reservations').delete().lt('booked_at',d15).neq('status','active')}catch(e){}
-  S.today=tdy();S.selDate=S.today;if(cache.insts.length>0)S.selInst=cache.insts[0].id;cSlots();unld();render()
 }
 init();
 </script>
