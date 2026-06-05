@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta property="og:title" content="qPCR仪器预约">
+<meta property="og:description" content="实验室qPCR仪器预约系统 · 快速预约">
+<meta property="og:image" content="https://picsum.photos/300/200">
+<meta property="og:type" content="website">
+<title>qPCR仪器预约</title>
+<style>
+:root {
+  --c1: #2B7C85; --c2: #1A5C63;
+  --green: #27AE60; --red: #E74C3C; --orange: #F39C12; --blue: #3498DB;
+  --bg: #F0F4F5; --card: #FFFFFF; --text: #1E2D2F; --text2: #7B8D8F;
+  --shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Segoe UI',sans-serif;
+  background:var(--bg);color:var(--text);font-size:15px;
+  min-height:100vh;-webkit-tap-highlight-color:transparent;
+}
+#app{max-width:520px;margin:0 auto;min-height:100vh;position:relative;}
+
+/* 导航 */
+.nav-bar{display:flex;background:linear-gradient(135deg,#2B7C85 0%,#1A5C63 40%,#0F3F45 100%);padding:12px 0 0;}
+.nav-item{flex:1;text-align:center;padding:14px 4px 12px;color:rgba(255,255,255,0.6);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s;border-bottom:3px solid transparent;}
+.nav-item.on{color:#fff;border-bottom-color:#fff;font-weight:700;}
+.nav-badge{display:inline-block;min-width:18px;height:18px;line-height:18px;border-radius:9px;background:#fff;color:var(--c1);font-size:11px;font-weight:700;padding:0 5px;margin-left:4px;vertical-align:top;}
+
+.page{display:none;padding-bottom:100px;}
+.page.active{display:block;}
+
+/* 日历 */
+.cal-wrap{padding:4px 12px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.cal-wrap::-webkit-scrollbar{display:none;}
+.cal-row{display:flex;gap:10px;white-space:nowrap;padding:2px 4px;}
+.day-chip{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:70px;height:80px;border-radius:18px;background:var(--card);box-shadow:var(--shadow);cursor:pointer;transition:all .2s;flex-shrink:0;padding:4px 10px;user-select:none;}
+.day-chip.today{border:2px solid var(--c1);}
+.day-chip.on{background:linear-gradient(135deg,#2B7C85,#1A5C63);border:none;transform:scale(1.05);}
+.day-chip.on .dw,.day-chip.on .dn{color:#fff!important;}
+.dw{font-size:11px;color:var(--text2);}
+.dn{font-size:22px;font-weight:800;color:var(--text);margin-top:2px;}
+
+/* 仪器 */
+.inst-wrap{padding:4px 12px;}
+.inst-grid{display:flex;flex-wrap:wrap;gap:10px;}
+.inst-chip{display:flex;align-items:center;gap:10px;width:calc((100% - 10px)/2);padding:14px 12px;border-radius:14px;background:var(--card);box-shadow:var(--shadow);border:2px solid transparent;cursor:pointer;transition:all .18s;}
+.inst-chip.on{border-color:var(--c1);background:#E8F4F5;}
+.inst-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.inst-dot.green{background:var(--green);box-shadow:0 0 8px rgba(39,174,96,0.4);}
+.inst-dot.gray{background:#BDC3C7;}
+.inst-info{flex:1;min-width:0;}
+.inst-name{font-size:14px;font-weight:700;display:block;}
+.inst-loc{font-size:11px;color:var(--text2);}
+.inst-status-tag{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600;flex-shrink:0;}
+.inst-status-tag.mt{background:#FFF3E0;color:#E65100;}
+.inst-status-tag.br{background:#FFEBEE;color:#C62828;}
+
+/* 通用 */
+.sec-label{display:flex;align-items:center;gap:6px;padding:8px 16px 12px;font-size:14px;font-weight:700;color:var(--text);}
+.sec-label .ico{font-size:16px;}
+.sec-hint{font-size:12px;color:var(--text2);font-weight:400;margin-left:auto;}
+.sec-badge{margin-left:auto;font-size:11px;background:#E8F5E9;color:#2E7D32;padding:2px 10px;border-radius:10px;font-weight:600;}
+
+/* 提示 */
+.alert{margin:6px 16px;padding:12px 16px;border-radius:12px;font-size:13px;display:flex;align-items:center;gap:6px;}
+.alert-warn{background:#FFF8E1;color:#E65100;}
+.alert-err{background:#FFEBEE;color:#C62828;}
+
+/* 时段 */
+.slot-wrap{padding:4px 16px;}
+.slot-grid{display:flex;flex-wrap:wrap;gap:10px;}
+.slot-card{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;width:calc((100% - 20px)/3);padding:14px 6px;border-radius:14px;background:var(--card);border:2px solid #E0E6E7;cursor:pointer;transition:all .15s;user-select:none;text-align:center;}
+.slot-card:active{transform:scale(0.95);}
+.slot-time{font-size:14px;font-weight:700;}
+.slot-dash{font-size:11px;color:#BDC3C7;margin:0 2px;}
+.slot-tag{width:100%;margin-top:4px;font-size:11px;text-align:center;}
+.slot-free .slot-tag{color:#2E7D32;}
+.slot-free{border-color:#A5D6A7;background:#F1F8F2;}
+.slot-mine .slot-tag{color:#F57F17;}
+.slot-mine{border-color:#FFF176;background:#FFFDE7;}
+.slot-booked .slot-tag{color:#BDBDBD;}
+.slot-booked{border-color:#E0E0E0;background:#FAFAFA;}
+.slot-locked .slot-tag{color:#BDBDBD;}
+.slot-locked{border-color:#E0E0E0;background:#F5F5F5;}
+.slot-disabled .slot-tag{color:#BDBDBD;}
+.slot-disabled{border-color:#EEE;background:#F5F5F5;border-style:dashed;}
+.slot-picked{border-color:var(--blue);background:#E3F2FD;}
+.slot-picked .slot-tag{color:#1565C0;font-weight:600;}
+
+.empty-box{display:flex;flex-direction:column;align-items:center;padding:60px 0;color:var(--text2);font-size:14px;}
+.empty-box .eico{font-size:50px;margin-bottom:10px;}
+
+/* 提交栏 */
+.submit-bar{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 20px;padding-bottom:calc(14px + env(safe-area-inset-bottom,8px));background:var(--card);box-shadow:0 -4px 20px rgba(0,0,0,0.08);z-index:50;}
+.submit-bar.has{background:#E8F4F5;}
+.submit-hint{font-size:14px;color:var(--text2);}
+.submit-count{font-size:14px;color:var(--text);}
+.submit-count b{font-size:24px;font-weight:800;color:var(--c1);}
+.submit-btn{padding:12px 36px;border-radius:28px;font-size:15px;font-weight:600;cursor:pointer;transition:all .2s;border:none;color:#BDC3C7;background:#ECF0F1;}
+.submit-btn.go{background:linear-gradient(135deg,#2B7C85,#1A5C63);color:#fff;box-shadow:0 4px 14px rgba(43,124,133,0.35);}
+.submit-btn.go:active{transform:scale(0.96);}
+.submit-btn.loading{opacity:0.7;pointer-events:none;}
+
+/* 我的预约 */
+.booking-tabs{display:flex;gap:12px;padding:14px 16px;background:#fff;border-bottom:1px solid #ECF0F1;}
+.btab{padding:10px 22px;border-radius:24px;font-size:14px;cursor:pointer;background:#ECF0F1;color:var(--text2);transition:all .2s;font-weight:500;}
+.btab.on{background:var(--c1);color:#fff;font-weight:700;}
+.btab .bnum{display:inline-block;min-width:20px;height:20px;line-height:20px;border-radius:10px;background:#fff;color:var(--c1);font-size:11px;font-weight:700;padding:0 6px;margin-left:4px;text-align:center;}
+.bcard{background:#fff;margin:14px 16px;border-radius:16px;box-shadow:var(--shadow);overflow:hidden;}
+.bcard.hist{opacity:0.8;}
+.bcard-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #ECF0F1;}
+.bcard-name{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;}
+.bcard-name .mi{font-size:22px;}
+.bcard-st{font-size:12px;padding:4px 12px;border-radius:12px;font-weight:600;}
+.bcard-st.act{background:#E8F5E9;color:var(--green);}
+.bcard-st.can{background:#FFF3E0;color:var(--orange);}
+.bcard-st.exp{background:#ECF0F1;color:var(--text2);}
+.bcard-bd{padding:14px 20px;}
+.bcard-row{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;}
+.bcard-row .lbl{color:var(--text2);}
+.bcard-row .val{font-weight:500;}
+.bcard-ft{padding:12px 20px;border-top:1px solid #ECF0F1;display:flex;justify-content:flex-end;gap:10px;}
+.btn-sm{padding:8px 20px;border-radius:20px;font-size:13px;cursor:pointer;border:none;font-weight:500;}
+.btn-sm.danger{background:var(--red);color:#fff;}
+.btn-sm.ghost{background:#ECF0F1;color:var(--text2);}
+
+/* 管理 */
+.adm-card{display:flex;align-items:center;justify-content:space-between;background:#fff;margin:12px 16px;padding:18px 20px;border-radius:16px;box-shadow:var(--shadow);}
+.adm-left{flex:1;}
+.adm-name{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;}
+.adm-loc{font-size:12px;color:var(--text2);margin-top:4px;}
+.adm-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+.adm-st{font-size:11px;padding:4px 12px;border-radius:12px;font-weight:600;}
+.adm-st.act{background:#E8F5E9;color:#27AE60;}
+.adm-st.mt{background:#FFF3E0;color:#F39C12;}
+.adm-st.br{background:#FFEBEE;color:#E74C3C;}
+.adm-edit{font-size:12px;color:var(--c1);background:#E8F4F5;padding:4px 12px;border-radius:10px;cursor:pointer;}
+
+/* 模态框 */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal-sheet{width:100%;max-width:520px;max-height:85vh;background:#fff;border-radius:24px 24px 0 0;padding-bottom:env(safe-area-inset-bottom,12px);animation:slideUp .25s;overflow-y:auto;}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;padding:20px;border-bottom:1px solid #ECF0F1;}
+.modal-title{font-size:18px;font-weight:700;}
+.modal-close{font-size:24px;color:var(--text2);cursor:pointer;padding:4px 8px;}
+.modal-bd{padding:20px;}
+.modal-ft{display:flex;gap:12px;padding:14px 20px;border-top:1px solid #ECF0F1;}
+.modal-ft .btn{flex:1;padding:14px;border-radius:24px;font-size:15px;text-align:center;cursor:pointer;border:none;font-weight:600;}
+.btn-cancel{background:#ECF0F1;color:var(--text2);}
+.btn-confirm{background:var(--c1);color:#fff;}
+.btn-confirm.danger{background:var(--red);}
+
+.fg{margin-bottom:18px;}
+.fg-label{display:block;font-size:14px;font-weight:600;margin-bottom:8px;}
+.fg-input{width:100%;height:44px;padding:0 14px;border:2px solid #ECF0F1;border-radius:12px;font-size:15px;background:#FAFAFA;outline:none;transition:border .15s;}
+.fg-input:focus{border-color:var(--c1);background:#fff;}
+.fg-input.err{border-color:var(--red);background:#FFF5F5;}
+.fg-err{font-size:12px;color:var(--red);margin-top:4px;display:none;}
+
+.st-options{display:flex;flex-direction:column;gap:10px;}
+.st-opt{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;background:#FAFAFA;border:2px solid transparent;cursor:pointer;font-size:14px;transition:.15s;}
+.st-opt.sel{border-color:var(--c1);background:#E8F4F5;}
+.st-dot{width:20px;height:20px;border-radius:50%;border:2px solid #BDC3C7;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.st-dot.chk{border-color:var(--c1);}
+.st-dot.chk::after{content:'';width:10px;height:10px;border-radius:50%;background:var(--c1);}
+
+.warn-box{display:flex;gap:12px;padding:16px;background:#FFF8E1;border-radius:12px;border-left:4px solid #F39C12;margin-top:8px;font-size:13px;}
+.warn-ico{font-size:28px;flex-shrink:0;}
+.warn-ttl{font-weight:700;color:#E67E22;display:block;margin-bottom:4px;}
+.warn-list{margin-top:8px;}
+.warn-list li{color:#795548;font-size:12px;padding:2px 0;}
+
+/* 全屏加载 */
+#loader{position:fixed;inset:0;background:rgba(255,255,255,0.85);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+#loader.hide{display:none;}
+.spin{width:36px;height:36px;border:3px solid #E0E6E7;border-top-color:var(--c1);border-radius:50%;animation:spin .8s linear infinite;margin-bottom:12px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{font-size:14px;color:var(--text2);}
+
+/* Toast */
+#toast-container{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;align-items:center;gap:8px;pointer-events:none;}
+.toast{padding:12px 24px;border-radius:24px;font-size:14px;font-weight:500;color:#fff;pointer-events:auto;animation:toastIn .3s,toastOut .3s 2s forwards;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.2);}
+.toast.info{background:#333;}
+.toast.ok{background:var(--green);}
+.toast.err{background:var(--red);}
+@keyframes toastIn{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes toastOut{from{opacity:1}to{opacity:0;transform:translateY(-10px)}}
+
+@media(min-width:520px){.slot-card{width:calc((100% - 30px)/4)}.inst-chip{width:calc((100% - 20px)/3)}}
+@media(max-width:360px){.slot-card{width:calc((100% - 10px)/2)}.inst-chip{width:100%}}
+</style>
+</head>
+<body>
+<div id="loader"><div class="spin"></div><div class="loader-text">连接云端…</div></div>
+<div id="app"></div>
+<div id="toast-container"></div>
+<div id="modal-container"></div>
+
+<!-- CloudBase Web SDK -->
+<script src="https://web.sdk.qcloud.com/cloudbase-js-sdk/1.7.0/cloudbase.full.js"></script>
+
+<script>
+// ==================== 北京时间工具 ====================
+var UTC8 = 8 * 3600000;
+function bjNow() { return new Date(Date.now() + UTC8); }
+function fmtDate(d, fmt) {
+  var m = { YYYY: d.getFullYear(), MM: String(d.getMonth()+1).padStart(2,'0'), DD: String(d.getDate()).padStart(2,'0'), HH: String(d.getHours()).padStart(2,'0'), mm: String(d.getMinutes()).padStart(2,'0'), ss: String(d.getSeconds()).padStart(2,'0') };
+  return fmt.replace(/YYYY|MM|DD|HH|mm|ss/g, function(k){ return m[k]; });
+}
+function todayStr() { return fmtDate(bjNow(), 'YYYY-MM-DD'); }
+function isAfter530() { var d = bjNow(); return d.getHours() > 5 || (d.getHours() === 5 && d.getMinutes() >= 30); }
+function isTomorrow(s) { var t = new Date(bjNow().getTime() + 86400000); return s === fmtDate(t, 'YYYY-MM-DD'); }
+function getWeekZh(s) { var m = ['周日','周一','周二','周三','周四','周五','周六']; return m[new Date(s).getDay()]; }
+function slotUTC(ds, ts) { var hmn = ts.split(':').map(Number); return Date.UTC(+ds.slice(0,4),+ds.slice(5,7)-1,+ds.slice(8,10),hmn[0]-8,hmn[1]); }
+function isExpired(ds, ts) { return Date.now() > slotUTC(ds, ts); }
+
+// ==================== Toast / Loader ====================
+var toastTimer = null;
+function toast(msg, type) {
+  type = type || 'info';
+  var c = document.getElementById('toast-container');
+  var el = document.createElement('div');
+  el.className = 'toast ' + type; el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 2500);
+}
+function showLoader(t) { var l=document.getElementById('loader'); l.classList.remove('hide'); l.querySelector('.loader-text').textContent=t||'加载中…'; }
+function hideLoader() { document.getElementById('loader').classList.add('hide'); }
+
+// ==================== 模态框 ====================
+function showModal(opts) {
+  var mc = document.getElementById('modal-container');
+  mc.innerHTML = '<div class="modal-overlay" id="modal-overlay"><div class="modal-sheet"><div class="modal-hd"><span class="modal-title">'+escHtml(opts.title||'')+'</span><span class="modal-close" id="modal-close">✕</span></div><div class="modal-bd">'+(opts.body||'')+'</div>'+(opts.footer!==false?'<div class="modal-ft">'+(opts.footer||'')+'</div>':'')+'</div></div>';
+  document.getElementById('modal-overlay').addEventListener('click',function(e){ if(e.target===this)closeModal(); });
+  document.getElementById('modal-close').addEventListener('click',closeModal);
+  if(opts.onShow)opts.onShow();
+}
+function closeModal(){ document.getElementById('modal-container').innerHTML=''; }
+function escHtml(s){ if(!s)return''; return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ==================== CloudBase 初始化 ====================
+var ENV_ID = 'cloudbase-d7gvawxiw5ea9234f';
+var tcbApp = null;
+var tcbDb = null;
+var tcbAuth = null;
+var userId = null; // 匿名登录的 uid
+var loginState = null;
+
+var DEFAULT_SLOTS = [
+  { startTime:'09:00',endTime:'10:00'},{ startTime:'10:00',endTime:'11:00'},
+  { startTime:'11:00',endTime:'12:00'},{ startTime:'12:00',endTime:'13:00'},
+  { startTime:'13:00',endTime:'14:00'},{ startTime:'14:00',endTime:'15:00'},
+  { startTime:'15:00',endTime:'16:00'},{ startTime:'16:00',endTime:'17:00'},
+  { startTime:'17:00',endTime:'18:00'},{ startTime:'18:00',endTime:'19:00'},
+  { startTime:'19:00',endTime:'20:00'},{ startTime:'20:00',endTime:'21:00'}
+];
+
+var DEFAULT_INSTRUMENTS = [
+  { name:'7500-1',location:'四楼',status:'active'},
+  { name:'7500-2',location:'四楼',status:'active'},
+  { name:'7500-3',location:'四楼',status:'active'},
+  { name:'7500-4',location:'四楼',status:'active'},
+  { name:'7500-5',location:'四楼',status:'active'},
+  { name:'7500-6',location:'三楼',status:'active'},
+  { name:'7500-7',location:'三楼',status:'active'}
+];
+
+// ==================== 本地缓存（从云端加载） ====================
+var cache = { instruments: [], reservations: [] };
+
+async function reloadCache() {
+  try {
+    var instRes = await tcbDb.collection('instruments').get();
+    cache.instruments = instRes.data || [];
+    cache.instruments.sort(function(a,b){
+      var o = {active:0,maintenance:1,broken:2};
+      return (o[a.status]||0)-(o[b.status]||0);
+    });
+  } catch(e) {
+    console.warn('加载仪器失败:', e.message);
+  }
+  try {
+    // 加载活跃预约（未来+近期）+ 当前用户的历史
+    var resRes = await tcbDb.collection('reservations')
+      .where({ status: 'active' })
+      .orderBy('date','asc').orderBy('startTime','asc')
+      .limit(500).get();
+    cache.reservations = resRes.data || [];
+  } catch(e) {
+    console.warn('加载预约失败:', e.message);
+  }
+}
+
+async function ensureInstruments() {
+  // 确保仪器数据存在，不存在则初始化
+  try {
+    var r = await tcbDb.collection('instruments').count();
+    if (r.total === 0) {
+      for (var i = 0; i < DEFAULT_INSTRUMENTS.length; i++) {
+        await tcbDb.collection('instruments').add(DEFAULT_INSTRUMENTS[i]);
+      }
+    }
+  } catch(e) { /* 忽略 */ }
+}
+
+// ==================== 数据访问（同步读缓存，异步写云端） ====================
+function getInstruments() { return cache.instruments; }
+function getReservations() { return cache.reservations; }
+
+async function addReservation(data) {
+  return tcbDb.collection('reservations').add(data);
+}
+
+async function updateReservation(id, data) {
+  return tcbDb.collection('reservations').doc(id).update(data);
+}
+
+async function updateInstrument(id, data) {
+  return tcbDb.collection('instruments').doc(id).update(data);
+}
+
+// ==================== 应用状态 ====================
+var state = {
+  page: 'booking',
+  selectedDate: todayStr(),
+  today: todayStr(),
+  selectedInstId: '',
+  timeSlots: [],
+  checkedSlots: [],
+  show530: false,
+  instStatus: 'active',
+  disabledReason: null,
+  btab: 'active'
+};
+
+// ==================== 渲染助手 ====================
+function h(tag, attrs, children) {
+  var el = document.createElement(tag);
+  if(attrs)for(var k in attrs){
+    if(k==='className')el.className=attrs[k];
+    else if(k==='style')Object.assign(el.style,attrs[k]);
+    else if(k.startsWith('on'))el.addEventListener(k.slice(2).toLowerCase(),attrs[k]);
+    else if(k==='text')el.textContent=attrs[k];
+    else if(k==='html')el.innerHTML=attrs[k];
+    else el.setAttribute(k,attrs[k]);
+  }
+  if(children){
+    if(typeof children==='string'||typeof children==='number')el.textContent=children;
+    else if(Array.isArray(children))children.forEach(function(c){if(c!==null&&c!==undefined)el.appendChild(typeof c==='string'?document.createTextNode(c):c);});
+    else el.appendChild(children);
+  }
+  return el;
+}
+
+function render() {
+  var app = document.getElementById('app');
+  app.innerHTML = '';
+  app.appendChild(renderNav());
+  if(state.page==='booking')app.appendChild(renderBooking());
+  else if(state.page==='mybookings')app.appendChild(renderMyBookings());
+  else if(state.page==='admin')app.appendChild(renderAdmin());
+  app.appendChild(renderSubmitBar());
+}
+
+function renderNav() {
+  var userIdLocal = userId;
+  var cnt = cache.reservations.filter(function(r){return r.status==='active'&&r.userId===userIdLocal&&!isExpired(r.date,r.startTime);}).length;
+  return h('div',{className:'nav-bar'},[
+    h('div',{className:'nav-item'+(state.page==='booking'?' on':''),onclick:function(){state.page='booking';refreshBooking();}},'预约仪器'),
+    h('div',{className:'nav-item'+(state.page==='mybookings'?' on':''),onclick:function(){state.page='mybookings';render();}},[
+      '我的预约', cnt>0?h('span',{className:'nav-badge',text:String(cnt)}):null
+    ]),
+    h('div',{className:'nav-item'+(state.page==='admin'?' on':''),onclick:function(){state.page='admin';render();}},'仪器管理')
+  ]);
+}
+
+function renderBooking() {
+  var instruments = getInstruments();
+  var dateList = (function(){
+    var a=[],s=new Date(state.today);
+    for(var i=0;i<7;i++){var d=new Date(s.getTime()+i*86400000);var ds=fmtDate(d,'YYYY-MM-DD');var p=ds.split('-');a.push({dateStr:ds,day:parseInt(p[1])+'/'+parseInt(p[2]),week:getWeekZh(ds)});}
+    return a;
+  })();
+  if(!state.selectedInstId&&instruments.length)state.selectedInstId=instruments[0]._id||instruments[0].id;
+  computeTimeSlots();
+
+  var wrapper = h('div',{className:'page active'});
+
+  // 日历
+  var calChips = dateList.map(function(d){
+    var cls='day-chip';
+    if(d.dateStr===state.today)cls+=' today';
+    if(d.dateStr===state.selectedDate)cls+=' on';
+    return h('div',{className:cls,'data-date':d.dateStr,onclick:function(){
+      state.selectedDate=d.dateStr;state.checkedSlots=[];computeTimeSlots();render();
+    }},[h('span',{className:'dw',text:d.week}),h('span',{className:'dn',text:d.day})]);
+  });
+  wrapper.appendChild(h('div',{className:'cal-wrap'},h('div',{className:'cal-row'},calChips)));
+
+  // 仪器
+  var instChips = instruments.map(function(item){
+    var id=item._id||item.id;
+    var cls='inst-chip';
+    if(id===state.selectedInstId)cls+=' on';
+    return h('div',{className:cls,'data-id':id,onclick:function(){
+      state.selectedInstId=id;state.checkedSlots=[];computeTimeSlots();render();
+    }},[
+      h('div',{className:'inst-dot '+(item.status==='active'?'green':'gray')}),
+      h('div',{className:'inst-info'},[h('span',{className:'inst-name',text:item.name}),h('span',{className:'inst-loc',text:item.location})]),
+      item.status==='maintenance'?h('span',{className:'inst-status-tag mt',text:'维修中'}):null,
+      item.status==='broken'?h('span',{className:'inst-status-tag br',text:'故障'}):null
+    ]);
+  });
+  wrapper.appendChild(h('div',{className:'inst-wrap'},[
+    h('div',{className:'sec-label'},[h('span',{className:'ico',text:'🧬'}),'选择仪器',h('span',{className:'sec-hint',text:'（同一时间只能预约一台）'})]),
+    h('div',{className:'inst-grid'},instChips)
+  ]));
+
+  if(state.show530)wrapper.appendChild(h('div',{className:'alert alert-warn',text:'⏰ 明天仪器预约将于每日 5:30 开放'}));
+  if(state.disabledReason)wrapper.appendChild(h('div',{className:'alert alert-err',text:'⚠️ '+state.disabledReason}));
+
+  // 时段
+  var slotSection=h('div',{className:'slot-wrap'});
+  slotSection.appendChild(h('div',{className:'sec-label'},[
+    h('span',{className:'ico',text:'🕐'}),state.selectedDate+' 可约时段',
+    h('span',{className:'sec-badge',text:state.timeSlots.length+'个'})
+  ]));
+  if(state.timeSlots.length===0){
+    slotSection.appendChild(h('div',{className:'empty-box'},[h('div',{className:'eico',text:'📭'}),'暂无可用时段']));
+  }else{
+    var grid=h('div',{className:'slot-grid'});
+    state.timeSlots.forEach(function(s,idx){
+      var cls='slot-card slot-'+s.status;
+      if(s.checked)cls+=' slot-picked';
+      var tag='';
+      if(s.status==='mine')tag='🔒 我的';
+      else if(s.status==='booked')tag='📌 已满';
+      else if(s.status==='locked')tag='🔐 待放';
+      else if(s.status==='disabled')tag='🚫 禁用';
+      else if(s.checked)tag='✅ 已选';
+      else tag='🟢 空闲';
+      grid.appendChild(h('div',{className:cls,'data-idx':idx,onclick:function(){toggleSlot(idx);}},[
+        h('span',{className:'slot-time',text:s.startTime}),
+        h('span',{className:'slot-dash',text:'—'}),
+        h('span',{className:'slot-time',text:s.endTime}),
+        h('div',{className:'slot-tag',text:tag})
+      ]));
+    });
+    slotSection.appendChild(grid);
+  }
+  wrapper.appendChild(slotSection);
+  return wrapper;
+}
+
+function computeTimeSlots() {
+  var instruments=getInstruments();
+  var inst=instruments.find(function(i){return (i._id||i.id)===state.selectedInstId;});
+  if(!inst){state.timeSlots=[];state.show530=false;state.disabledReason=null;return;}
+  var instStatus=inst.status||'active';
+  var disabledReason=null;
+  if(instStatus==='maintenance')disabledReason='仪器维护中，暂不可预约';
+  else if(instStatus==='broken')disabledReason='仪器故障，暂不可预约';
+  state.instStatus=instStatus;state.disabledReason=disabledReason;
+  var slots=DEFAULT_SLOTS.map(function(s){return{startTime:s.startTime,endTime:s.endTime,status:'free'};});
+  if(disabledReason){state.timeSlots=slots.map(function(s){s.status='disabled';s.disabledReason=disabledReason;return s;});state.show530=false;return;}
+  var reservations=getReservations();
+  var bookedSet={},mySet={};
+  reservations.forEach(function(r){
+    if(r.status==='active'&&(r.instrumentId===state.selectedInstId||r.instrumentId===inst._id)&&r.date===state.selectedDate){
+      if(r.userId===userId)mySet[r.startTime]=true;
+      else bookedSet[r.startTime]=true;
+    }
+  });
+  var locked=(state.selectedDate!==state.today&&isTomorrow(state.selectedDate)&&!isAfter530());
+  state.show530=locked;
+  slots.forEach(function(s){
+    if(locked)s.status='locked';
+    else if(mySet[s.startTime])s.status='mine';
+    else if(bookedSet[s.startTime])s.status='booked';
+  });
+  var checkedSet={};
+  state.checkedSlots.filter(function(cs){return cs.date===state.selectedDate;}).forEach(function(cs){checkedSet[cs.startTime]=true;});
+  slots.forEach(function(s){s.checked=checkedSet[s.startTime]&&s.status==='free';});
+  state.timeSlots=slots;
+}
+
+function toggleSlot(idx){
+  var s=state.timeSlots[idx];
+  if(['booked','mine','locked','disabled'].indexOf(s.status)>=0){
+    if(s.status==='locked')toast('明天仪器预约将于每日 5:30 开放','err');
+    else if(s.status==='disabled')toast(s.disabledReason||'该时段暂不可预约','err');
+    else if(s.status==='mine')toast('您已预约该时段','err');
+    return;
+  }
+  s.checked=!s.checked;state.timeSlots[idx]=Object.assign({},s);syncChecked();render();
+}
+function syncChecked(){
+  var others=state.checkedSlots.filter(function(cs){return cs.date!==state.selectedDate;});
+  var cur=state.timeSlots.filter(function(s){return s.checked;}).map(function(s){return{date:state.selectedDate,startTime:s.startTime,endTime:s.endTime};});
+  state.checkedSlots=others.concat(cur);
+}
+
+function renderSubmitBar(){
+  if(state.page!=='booking')return h('div');
+  var count=state.timeSlots.filter(function(s){return s.checked;}).length;
+  return h('div',{className:'submit-bar'+(count>0?' has':'')},[
+    h('div',{className:'submit-left'},count===0
+      ?h('span',{className:'submit-hint',text:'请选择需要预约的时段'})
+      :h('span',{className:'submit-count',html:'已选 <b>'+count+'</b> 个时段'})),
+    h('button',{className:'submit-btn'+(count>0?' go':''),text:'提交预约',onclick:count>0?onSubmitBooking:null})
+  ]);
+}
+
+// ── 提交预约 ──
+function onSubmitBooking(){
+  var slots=state.checkedSlots;
+  if(slots.length===0){toast('请先选择时段','err');return;}
+  var instruments=getInstruments();
+  var inst=instruments.find(function(i){return(i._id||i.id)===state.selectedInstId;});
+  var hasLocked=false;
+  slots.forEach(function(s){if(isTomorrow(s.date)&&!isAfter530())hasLocked=true;});
+  if(hasLocked){toast('明天预约将于5:30开放','err');return;}
+  if(!inst||inst.status!=='active'){toast(inst?'该仪器暂不可预约':'仪器不存在','err');return;}
+  var reservations=getReservations();
+  var now=Date.now();
+  var futureMine=reservations.filter(function(r){return r.userId===userId&&r.status==='active'&&slotUTC(r.date,r.startTime)>now;});
+  var otherInst=futureMine.find(function(r){return r.instrumentId!==state.selectedInstId&&r.instrumentId!==inst._id;});
+  if(otherInst){var oi=instruments.find(function(i){return(i._id||i.id)===otherInst.instrumentId;});toast('您已预约"'+(oi?oi.name:'其他仪器')+'"，请先取消后再预约其他仪器','err');return;}
+  var allRes=reservations.filter(function(r){return r.status==='active'&&(r.instrumentId===state.selectedInstId||r.instrumentId===inst._id);});
+  var conflict=null,expiredSlots=[];
+  slots.forEach(function(s){
+    if(allRes.some(function(r){return r.date===s.date&&r.startTime===s.startTime&&r.userId!==userId;}))conflict=s;
+    if(slotUTC(s.date,s.startTime)<=now)expiredSlots.push(s);
+  });
+  if(conflict){toast(conflict.date+' '+conflict.startTime+' 已被他人预约','err');return;}
+  if(expiredSlots.length>0){toast(expiredSlots[0].date+' '+expiredSlots[0].startTime+' 已过期','err');return;}
+  showBookingForm(slots);
+}
+
+function showBookingForm(slots){
+  var slotsText=slots.map(function(s){return s.date+' '+s.startTime+'-'+s.endTime;}).join('<br>');
+  var bodyHtml='<div style="background:#E8F4F5;padding:12px 16px;border-radius:12px;margin-bottom:16px;font-size:13px;line-height:1.8;"><strong>预约时段：</strong><br>'+slotsText+'<br><span style="color:var(--text2);">共 '+slots.length+' 个时段</span></div>';
+  bodyHtml+='<div class="fg"><div class="fg-label">姓名 <span style="color:var(--red);">*</span></div><input class="fg-input" id="form-name" placeholder="请输入您的姓名" maxlength="20"><div class="fg-err" id="err-name">请输入姓名</div></div>';
+  bodyHtml+='<div class="fg"><div class="fg-label">手机号 <span style="color:var(--red);">*</span></div><input class="fg-input" id="form-phone" placeholder="请输入手机号" maxlength="11" type="tel"><div class="fg-err" id="err-phone">请输入有效手机号</div></div>';
+  bodyHtml+='<div class="fg"><div class="fg-label">备注</div><input class="fg-input" id="form-notes" placeholder="选填（如实验名称）" maxlength="100"></div>';
+  showModal({title:'填写预约信息',body:bodyHtml,
+    footer:'<button class="btn btn-cancel" id="btn-cancel-form">取消</button><button class="btn btn-confirm" id="btn-confirm-form">确认预约</button>',
+    onShow:function(){
+      document.getElementById('btn-cancel-form').addEventListener('click',closeModal);
+      document.getElementById('btn-confirm-form').addEventListener('click',function(){
+        var ne=document.getElementById('form-name'),pe=document.getElementById('form-phone'),nte=document.getElementById('form-notes');
+        var name=(ne.value||'').trim(),phone=(pe.value||'').trim(),notes=(nte.value||'').trim(),valid=true;
+        if(!name){document.getElementById('err-name').style.display='block';ne.classList.add('err');valid=false;}
+        else{document.getElementById('err-name').style.display='none';ne.classList.remove('err');}
+        if(!phone||!/^1\d{10}$/.test(phone)){document.getElementById('err-phone').style.display='block';pe.classList.add('err');valid=false;}
+        else{document.getElementById('err-phone').style.display='none';pe.classList.remove('err');}
+        if(!valid)return;
+        closeModal();doBook(slots,name,phone,notes);
+      });
+    }
+  });
+}
+
+async function doBook(slots,name,phone,notes){
+  showLoader('提交预约中…');
+  try {
+    var instruments=getInstruments();
+    var inst=instruments.find(function(i){return(i._id||i.id)===state.selectedInstId;});
+    var instId=inst._id||inst.id;
+    var instName=inst.name;
+    var now=Date.now();
+    // 再次校验冲突
+    var reservations=getReservations();
+    var allRes=reservations.filter(function(r){return r.status==='active'&&(r.instrumentId===state.selectedInstId||r.instrumentId===instId);});
+    for(var i=0;i<slots.length;i++){
+      var s=slots[i];
+      if(allRes.some(function(r){return r.date===s.date&&r.startTime===s.startTime&&r.userId!==userId;})){hideLoader();toast(s.date+' '+s.startTime+' 已被他人预约','err');return;}
+      if(slotUTC(s.date,s.startTime)<=now){hideLoader();toast(s.date+' '+s.startTime+' 已过期','err');return;}
+    }
+    // 写入云端
+    for(var j=0;j<slots.length;j++){
+      var ss=slots[j];
+      await addReservation({
+        userId:userId, instrumentId:instId, instrumentName:instName,
+        date:ss.date, startTime:ss.startTime, endTime:ss.endTime,
+        status:'active', name:name, phone:phone, notes:notes,
+        bookedAt: new Date().toISOString()
+      });
+    }
+    await reloadCache();
+    hideLoader();
+    state.checkedSlots=[];
+    toast('预约成功！'+slots.length+'个时段','ok');
+    computeTimeSlots();render();
+  }catch(e){
+    hideLoader();toast('提交失败: '+(e.message||'未知错误'),'err');
+  }
+}
+
+function refreshBooking(){state.checkedSlots=[];computeTimeSlots();render();}
+
+// ── 我的预约 ──
+function renderMyBookings(){
+  var wrapper=h('div',{className:'page active'});
+  var allRes=getReservations().filter(function(r){return r.userId===userId;});
+  var activeList=allRes.filter(function(r){return r.status==='active'&&!isExpired(r.date,r.startTime);});
+  var historyList=allRes.filter(function(r){return r.status!=='active'||isExpired(r.date,r.startTime);});
+  historyList.sort(function(a,b){return b.date.localeCompare(a.date)||b.startTime.localeCompare(a.startTime);});
+  var btabRow=h('div',{className:'booking-tabs'});
+  btabRow.appendChild(h('div',{className:'btab'+(state.btab==='active'?' on':''),onclick:function(){state.btab='active';render();}},['进行中',activeList.length>0?h('span',{className:'bnum',text:String(activeList.length)}):null]));
+  btabRow.appendChild(h('div',{className:'btab'+(state.btab==='history'?' on':''),onclick:function(){state.btab='history';render();}},'历史记录'));
+  wrapper.appendChild(btabRow);
+  if(state.btab==='active'){
+    if(activeList.length===0)wrapper.appendChild(h('div',{className:'empty-box'},[h('div',{className:'eico',text:'📋'}),'暂无进行中的预约',h('div',{style:'font-size:12px;margin-top:4px;',text:'去首页预约仪器吧'})]));
+    else activeList.forEach(function(r){wrapper.appendChild(renderBookingCard(r,true));});
+  }else{
+    if(historyList.length===0)wrapper.appendChild(h('div',{className:'empty-box'},[h('div',{className:'eico',text:'📭'}),'暂无历史记录']));
+    else historyList.forEach(function(r){wrapper.appendChild(renderBookingCard(r,false));});
+  }
+  return wrapper;
+}
+
+function renderBookingCard(r,isActive){
+  var expired=isExpired(r.date,r.startTime);
+  var canCancel=isActive&&!expired&&r.status==='active';
+  var statusText=r.status==='cancelled'?'已取消':(expired?'已过期':'进行中');
+  var statusCls=r.status==='cancelled'?'can':((expired||r.status==='expired')?'exp':'act');
+  var card=h('div',{className:'bcard'+(isActive?'':' hist')});
+  card.appendChild(h('div',{className:'bcard-hd'},[
+    h('div',{className:'bcard-name'},[h('span',{className:'mi',text:'🧬'}),r.instrumentName]),
+    h('span',{className:'bcard-st '+statusCls,text:statusText})
+  ]));
+  card.appendChild(h('div',{className:'bcard-bd'},[
+    h('div',{className:'bcard-row'},[h('span',{className:'lbl',text:'预约日期'}),h('span',{className:'val',text:r.date+' '+getWeekZh(r.date)})]),
+    h('div',{className:'bcard-row'},[h('span',{className:'lbl',text:'预约时段'}),h('span',{className:'val',text:r.startTime+' - '+r.endTime})]),
+    h('div',{className:'bcard-row'},[h('span',{className:'lbl',text:'预约人'}),h('span',{className:'val',text:(r.name||'')+' '+(r.phone||'')})]),
+    r.notes?h('div',{className:'bcard-row'},[h('span',{className:'lbl',text:'备注'}),h('span',{className:'val',text:r.notes})]):null,
+    h('div',{className:'bcard-row'},[h('span',{className:'lbl',text:'提交时间'}),h('span',{className:'val',text:formatBookedAt(r.bookedAt)})])
+  ]));
+  if(isActive){
+    card.appendChild(h('div',{className:'bcard-ft'},[
+      canCancel?h('button',{className:'btn-sm danger',text:'取消预约',onclick:function(){cancelBooking(r._id||r.id);}}):h('button',{className:'btn-sm ghost',text:expired?'已过期':'不可取消'})
+    ]));
+  }
+  return card;
+}
+function formatBookedAt(iso){if(!iso)return'';var d=new Date(iso);return fmtDate(d,'YYYY-MM-DD HH:mm');}
+
+async function cancelBooking(bookingId){
+  var reservations=getReservations();
+  var r=reservations.find(function(x){return(x._id||x.id)===bookingId;});
+  if(!r){toast('预约不存在','err');return;}
+  if(r.userId!==userId){toast('无权操作','err');return;}
+  if(r.status==='cancelled'){toast('已取消','err');return;}
+  if(isExpired(r.date,r.startTime)){toast('已过期，无法取消','err');return;}
+  showModal({title:'确认取消',
+    body:'<p style="line-height:1.8;">取消后该时段将释放，其他人可以预约。<br><strong>'+r.date+' '+r.startTime+'-'+r.endTime+'</strong><br>确定要取消吗？</p>',
+    footer:'<button class="btn btn-cancel" id="btn-cancel-no">我再想想</button><button class="btn btn-confirm danger" id="btn-cancel-yes">确定取消</button>',
+    onShow:function(){
+      document.getElementById('btn-cancel-no').addEventListener('click',closeModal);
+      document.getElementById('btn-cancel-yes').addEventListener('click',async function(){
+        closeModal();showLoader('取消中…');
+        try{await updateReservation(bookingId,{status:'cancelled',cancelledAt:new Date().toISOString()});await reloadCache();hideLoader();toast('已取消','ok');render();}
+        catch(e){hideLoader();toast('取消失败: '+(e.message||'未知错误'),'err');}
+      });
+    }
+  });
+}
+
+// ── 仪器管理 ──
+function renderAdmin(){
+  var wrapper=h('div',{className:'page active'});
+  wrapper.appendChild(h('div',{style:'padding:20px 16px 8px;font-size:18px;font-weight:700;',text:'仪器管理'}));
+  wrapper.appendChild(h('div',{style:'padding:0 16px 16px;font-size:12px;color:var(--text2);',text:'管理仪器信息与状态'}));
+  var instruments=getInstruments();
+  var statusMap={active:'正常',maintenance:'维修中',broken:'故障'};
+  instruments.forEach(function(item){
+    wrapper.appendChild(h('div',{className:'adm-card'},[
+      h('div',{className:'adm-left'},[h('div',{className:'adm-name'},[h('span',{text:'🧬'}),item.name]),h('div',{className:'adm-loc',text:'📍 '+(item.location||'未设置')})]),
+      h('div',{className:'adm-right'},[
+        h('span',{className:'adm-st '+(item.status==='active'?'act':item.status==='maintenance'?'mt':'br'),text:statusMap[item.status]||item.status}),
+        h('span',{className:'adm-edit',text:'✏️ 编辑',onclick:function(){showEditModal(item);}})
+      ])
+    ]));
+  });
+  return wrapper;
+}
+
+function showEditModal(origItem){
+  var editItem={id:origItem._id||origItem.id,name:origItem.name||'',location:origItem.location||'',status:origItem.status||'active'};
+  var origStatus=origItem.status;var confirmMode=false;
+
+  function checkWarning(st){
+    if(origStatus==='active'&&st!=='active'){
+      var reservations=getReservations();
+      var now=Date.now();
+      var future=reservations.filter(function(r){return r.instrumentId===editItem.id&&r.status==='active'&&slotUTC(r.date,r.startTime)>now;});
+      if(future.length>0)return{message:'该仪器未来有 '+future.length+' 条有效预约。修改状态后新预约将被禁止，但已有预约不会被自动取消，请手动联系用户处理。',bookings:future.slice(0,10)};
+    }return null;
+  }
+
+  function renderModal(){
+    document.getElementById('modal-container').innerHTML='';
+    var warn=checkWarning(editItem.status);
+    var labels={active:'🟢 正常（可预约）',maintenance:'🟡 维修中（不可预约）',broken:'🔴 故障（不可预约）'};
+    var bodyHtml='';
+    bodyHtml+='<div class="fg"><div class="fg-label">仪器名称</div><input class="fg-input" id="edit-name" value="'+escHtml(editItem.name)+'" placeholder="请输入仪器名称"></div>';
+    bodyHtml+='<div class="fg"><div class="fg-label">放置位置</div><input class="fg-input" id="edit-location" value="'+escHtml(editItem.location)+'" placeholder="请输入放置位置"></div>';
+    bodyHtml+='<div class="fg"><div class="fg-label">仪器状态</div><div class="st-options">';
+    ['active','maintenance','broken'].forEach(function(v){
+      bodyHtml+='<div class="st-opt'+(editItem.status===v?' sel':'')+'" data-val="'+v+'" id="st-opt-'+v+'"><div class="st-dot'+(editItem.status===v?' chk':'')+'"></div>'+labels[v]+'</div>';
+    });
+    bodyHtml+='</div></div>';
+    if(warn&&warn.bookings&&warn.bookings.length>0&&confirmMode){
+      bodyHtml+='<div class="warn-box"><div class="warn-ico">⚠️</div><div class="warn-content"><span class="warn-ttl">注意：存在未来预约</span><span style="color:#795548;">'+escHtml(warn.message)+'</span><ul class="warn-list">';
+      warn.bookings.forEach(function(b){bodyHtml+='<li>• '+b.date+' '+b.startTime+'-'+b.endTime+'（'+(b.name||'')+'）</li>';});
+      bodyHtml+='</ul></div></div>';
+    }
+    var btnText=(warn&&!confirmMode)?'确认修改（已知晓影响）':'保存修改';
+    var footerHtml='<button class="btn btn-cancel" id="btn-cancel">取消</button><button class="btn btn-confirm" id="btn-submit">'+btnText+'</button>';
+    var overlay=document.createElement('div');overlay.className='modal-overlay';
+    overlay.addEventListener('click',function(e){if(e.target===overlay)closeModal();});
+    var sheet=document.createElement('div');sheet.className='modal-sheet';
+    sheet.innerHTML='<div class="modal-hd"><span class="modal-title">编辑仪器</span><span class="modal-close" id="modal-close">✕</span></div><div class="modal-bd">'+bodyHtml+'</div><div class="modal-ft">'+footerHtml+'</div>';
+    overlay.appendChild(sheet);
+    document.getElementById('modal-container').appendChild(overlay);
+    document.getElementById('modal-close').addEventListener('click',closeModal);
+    document.getElementById('btn-cancel').addEventListener('click',closeModal);
+    document.getElementById('edit-name').addEventListener('input',function(){editItem.name=this.value;});
+    document.getElementById('edit-location').addEventListener('input',function(){editItem.location=this.value;});
+    ['active','maintenance','broken'].forEach(function(v){
+      var el=document.getElementById('st-opt-'+v);
+      if(el)el.addEventListener('click',function(){editItem.status=el.getAttribute('data-val');renderModal();});
+    });
+    document.getElementById('btn-submit').addEventListener('click',async function(){
+      editItem.name=document.getElementById('edit-name').value.trim();
+      editItem.location=document.getElementById('edit-location').value.trim();
+      if(!editItem.name){toast('请输入仪器名称','err');return;}
+      var warn2=checkWarning(editItem.status);
+      if(warn2&&!confirmMode){confirmMode=true;renderModal();return;}
+      showLoader('保存中…');
+      try{
+        await updateInstrument(editItem.id,{name:editItem.name,location:editItem.location,status:editItem.status});
+        await reloadCache();hideLoader();closeModal();toast('保存成功','ok');render();
+      }catch(e){hideLoader();toast('保存失败: '+(e.message||'未知错误'),'err');}
+    });
+  }
+  renderModal();
+}
+
+// ==================== 初始化 ====================
+async function initApp(){
+  showLoader('连接云端…');
+
+  // 1. 初始化 CloudBase
+  if(typeof cloudbase==='undefined'){hideLoader();document.body.innerHTML='<div style="padding:40px;text-align:center;"><h2>加载失败</h2><p>CloudBase SDK 加载失败，请检查网络连接。</p></div>';return;}
+
+  try{
+    tcbApp = cloudbase.init({ env: ENV_ID });
+    tcbAuth = tcbApp.auth();
+
+    // 匿名登录
+    showLoader('正在登录…');
+    await tcbAuth.anonymousAuthProvider().signIn();
+    loginState = await tcbAuth.getLoginState();
+    userId = loginState.user.uid;
+
+    // 2. 初始化数据库引用
+    tcbDb = tcbApp.database();
+
+    // 3. 确保仪器数据存在
+    showLoader('检查数据…');
+    await ensureInstruments();
+
+    // 4. 加载数据
+    showLoader('加载数据…');
+    await reloadCache();
+
+    // 5. 设置初始状态
+    state.today = todayStr();
+    state.selectedDate = state.today;
+    var instruments = getInstruments();
+    if(instruments.length>0) state.selectedInstId = instruments[0]._id || instruments[0].id;
+    computeTimeSlots();
+
+    hideLoader();
+    render();
+  }catch(e){
+    hideLoader();
+    var errMsg = e.message || String(e);
+    console.error('初始化失败:', errMsg);
+    // 显示友好错误
+    var appEl = document.getElementById('app');
+    appEl.innerHTML = '<div style="padding:60px 20px;text-align:center;">'+
+      '<div style="font-size:60px;margin-bottom:16px;">⚠️</div>'+
+      '<h2 style="margin-bottom:12px;">连接云端失败</h2>'+
+      '<p style="color:var(--text2);margin-bottom:8px;">错误: '+escHtml(errMsg)+'</p>'+
+      '<div style="background:#FFF8E1;border-radius:12px;padding:16px;margin:20px 0;text-align:left;font-size:13px;line-height:1.8;">'+
+      '<strong>请检查以下 CloudBase 配置：</strong><br>'+
+      '1. 登录 <a href="https://console.cloud.tencent.com/tcb" target="_blank">CloudBase 控制台</a><br>'+
+      '2. 选择环境 <code>'+ENV_ID+'</code><br>'+
+      '3. 进入「登录授权」→ 开启「匿名登录」<br>'+
+      '4. 进入「安全配置」→「Web 安全域名」→ 添加当前网页的域名<br>'+
+      '5. 进入「数据库」→ 选择集合 →「权限设置」→ 设为「所有用户可读写」<br>'+
+      '</div>'+
+      '<button onclick="location.reload()" style="padding:12px 32px;border-radius:24px;background:var(--c1);color:#fff;border:none;font-size:15px;cursor:pointer;">重新连接</button>'+
+      '</div>';
+  }
+}
+
+// 启动应用
+document.addEventListener('DOMContentLoaded', initApp);
+</script>
+</body>
+</html>
