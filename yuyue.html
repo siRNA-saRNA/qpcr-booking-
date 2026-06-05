@@ -9,7 +9,7 @@
 <meta property="og:type" content="website">
 <meta itemprop="name" content="qPCR仪器预约">
 <meta itemprop="description" content="实验室qPCR仪器预约系统 · 快速预约">
-<meta itemprop="image" content="https://placehold.co/300x300/2B7C85/white?text=qPCR">
+<meta itemprop="image" content="https://siRNA-saRNA.github.io/qpcr-booking-/icon.png">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='20' width='100' height='100' fill='%232B7C85'/><text x='50' y='68' text-anchor='middle' font-size='50' font-family='sans-serif' fill='white'>🧬</text></svg>">
 <title>qPCR仪器预约</title>
 <style>
@@ -119,13 +119,13 @@ var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSI
 var sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ==================== 北京时间工具 ====================
-var U8=8*3600000;
-function bjNow(){return new Date(Date.now()+U8)}
+// 直接用浏览器本地时间（中国用户本地时区=UTC+8=北京时间）
+function bjNow(){return new Date()}
 function fmD(d,f){var m={YYYY:d.getFullYear(),MM:String(d.getMonth()+1).padStart(2,'0'),DD:String(d.getDate()).padStart(2,'0'),HH:String(d.getHours()).padStart(2,'0'),mm:String(d.getMinutes()).padStart(2,'0')};return f.replace(/YYYY|MM|DD|HH|mm/g,function(k){return m[k]})}
 function tdy(){return fmD(bjNow(),'YYYY-MM-DD')}
 function i530(){var d=bjNow();return d.getHours()>5||(d.getHours()===5&&d.getMinutes()>=30)}
-function iTmr(s){return s===fmD(new Date(bjNow().getTime()+86400000),'YYYY-MM-DD')}
-function wkZh(s){return['周日','周一','周二','周三','周四','周五','周六'][new Date(s).getDay()]}
+function iTmr(s){var t=new Date();t.setDate(t.getDate()+1);return s===fmD(t,'YYYY-MM-DD')}
+function wkZh(s){return['周日','周一','周二','周三','周四','周五','周六'][new Date(s+'T12:00:00+08:00').getDay()]}
 function sUTC(ds,ts){var h=ts.split(':').map(Number);return Date.UTC(+ds.slice(0,4),+ds.slice(5,7)-1,+ds.slice(8,10),h[0]-8,h[1])}
 function iExp(ds,ts){return Date.now()>sUTC(ds,ts)}
 
